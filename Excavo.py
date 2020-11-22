@@ -2,7 +2,7 @@ import pygame
 import sys, os
 import math
 from pygame.locals import *
-
+import random
 
  
 pygame.init()
@@ -30,11 +30,36 @@ RAREMINERAL = 0
 # #Key;MiniPlanets = ["Directory of Image", Width, Height, Orbit Radius, Speed, Trail Color, Trail Lenght, FocusMode, Name]
 #For trail lenght, 2 is about half, less is longer, higher is shorter, Make sure direction and length match!
 SunInfo = ["Resources/MiniPlanets/Sun.png",200,200,0,0,(0,0,0), 0, False, "Sun"]
-DitheaPlanetInfo = ["Resources/MiniPlanets/DitheaPlanet.png",120,120,550,-0.5,(27,110,13), -3, False, "Dithea"]
+DitheaPlanetInfo = ["Resources/MiniPlanets/DitheaPlanet.png",120,120,550,-0.5,(32,186,102), -3, False, "Dithea"]
 EurusPlanetInfo = ["Resources/MiniPlanets/EurusPlanet.png",100,100,800,-1,(191,191,191), -2, False, "Eurus"]
 CrystinePlanetInfo = ["Resources/MiniPlanets/CrystinePlanet.png",60,60,1000,1,(188,255,237), 4, False, "Crystine"]
 RunothPlanetInfo = ["Resources/MiniPlanets/RunothPlanet.png",100,100,300,1,(191,46,69), 4, False, "Runoth"]
 
+#Miner Object Lists
+Miners = []
+
+#Dictionary Setup
+#[[Cost], [Percent Yields], Cycle]
+# Cost is an int Value [Money, Stone, Coal, Iron, Silicon, Quartz, Gold, Rare Mineral]
+# Percent Yield is what chance an item is chosen for a cycle [Stone, Coal, Iron, Silicon, Quartz, Gold, Rare Mineral]
+# Cycle is the number of frames between mine +1 i.e. 1 is every frame, 60 is about every second
+MinerDictionary = {
+    "DL" : [[100,50,20,0,0,0,0,0], [0.7, 0.2, 0.1, 0, 0, 0, 0], 30],
+    "DM" : [[0,0,0,0,0,0,0,0], [0.7, 0.2, 0.1, 0, 0, 0, 0], 20],
+    "DH" : [[0,0,0,0,0,0,0,0], [0.7, 0.2, 0.1, 0, 0, 0, 0], 10],
+
+    "EL" : [[0,0,0,0,0,0,0,0], [0.7, 0.2, 0.1, 0, 0, 0, 0], 30],
+    "EM" : [[0,0,0,0,0,0,0,0], [0.7, 0.2, 0.1, 0, 0, 0, 0], 30],
+    "EH" : [[0,0,0,0,0,0,0,0], [0.7, 0.2, 0.1, 0, 0, 0, 0], 30],
+
+    "CL" : [[0,0,0,0,0,0,0,0], [0.7, 0.2, 0.1, 0, 0, 0, 0], 30],
+    "CM" : [[0,0,0,0,0,0,0,0], [0.7, 0.2, 0.1, 0, 0, 0, 0], 30],
+    "CH" : [[0,0,0,0,0,0,0,0], [0.7, 0.2, 0.1, 0, 0, 0, 0], 30],
+
+    "RL" : [[0,0,0,0,0,0,0,0], [0.7, 0.2, 0.1, 0, 0, 0, 0], 30],
+    "RM" : [[0,0,0,0,0,0,0,0], [0.7, 0.2, 0.1, 0, 0, 0, 0], 30],
+    "RH" : [[0,0,0,0,0,0,0,0], [0.7, 0.2, 0.1, 0, 0, 0, 0], 30],
+}
 
 #PlanetDescriptor
 #Key;MiniPlanets = [Who It is Describing, Link to Description, BKG Color, BKG Opacity, Text Color, Active]
@@ -47,7 +72,7 @@ MoneyInfo = ["Money: ","MONEY", 30, 0.01, 0.01, (255,255,255), True, True, True,
 #Buttons
 #Key; [Image link, Default x, Defaul y, Width, Height, Action, Enable0, Enable1, Enable2, Enable3, Planet]
 MarketButtonInfo = ["Resources/Visuals/MarketLogo.png", 16, 221, 66, 66, "Toggle MARKETENABLE", True, True, True, True, "", "CornerLeft"]
-SettingsButtonInfo = ["Resources/Visuals/SettingsLogo.png", 86, 221, 66, 66, "", True, True, True, True, "", "CornerLeft"]
+SettingsButtonInfo = ["Resources/Visuals/SettingsLogo.png", 86, 221, 66, 66, "New Dithea T1", True, True, True, True, "", "CornerLeft"]
 HelpButtonInfo = ["Resources/Visuals/HelpLogo.png", 156, 221, 66, 66, "", True, True, True, True, "", "CornerLeft"]
 
 #All Market Buy Sell Buttons
@@ -88,6 +113,7 @@ OFFSET = 0.8 #Left Right planet offeset when focused
 ZLOCATION = [0,0]
 FOCUSACTIVE = True
 MARKETENABLE = False
+ID = 1
 #Gamestate allows for porper components to be on screen, 0 for no focus, 1 for focusing, 2 for focused, 3 for defocusing
 GAMESTATE = 0
 EASE = 1 #Creates Smoother Trasitions
@@ -104,7 +130,7 @@ font1 = pygame.font.Font('PressStart2P-Regular.ttf', 20)
 #Depreciated
 #TARGET = 0
 
-def ActionCenter(Action):
+def TaskHandler(Action):
     global MONEY
     global STONE
     global COAL
@@ -113,6 +139,9 @@ def ActionCenter(Action):
     global QUARTZ
     global GOLD
     global RAREMINERAL
+    global ID
+    global Miners
+
     if "Buy" in Action:
         if "Stone" in Action:
             if MONEY >= BuyPrices[0]:
@@ -208,6 +237,33 @@ def ActionCenter(Action):
                 ClickableEntities.remove(GoBuyBt)
                 ClickableEntities.remove(RMSellBt)
                 ClickableEntities.remove(RMBuyBt)
+    elif "New" in Action:
+        MinerID = ""
+        if "Dithea" in Action:
+            MinerID = "D"
+        elif "Eurus" in Action:
+            MinerID = "E"
+        elif "Crystine" in Action:
+            MinerID = "C"
+        elif "Runoth" in Action:
+            MinerID = "R"
+        
+        if "T1" in Action:
+            MinerID += "L"
+        elif "T2" in Action:
+            MinerID += "M"
+        elif "T3" in Action:
+            MinerID += "H"
+        
+        if PriceChecker(MinerID):
+            MinerID += str(ID)
+            ID += 1
+            Miners.append(Miner(MinerID, random.randint(0,59)))
+            print (MinerID)
+
+        else:
+            print ("Purchase Error")
+
 
 def MarketDrawer():
     FontData3 = pygame.font.Font('PressStart2P-Regular.ttf', int(21*SFACTOR))
@@ -222,7 +278,29 @@ def MarketDrawer():
         rect.center = (int((WIDTH/2)+(DefaultLocationBuy[i][0]*SFACTOR)),int((HEIGHT/2)+(DefaultLocationBuy[i][1]*SFACTOR)))
         displaysurface.blit(surf, rect)
 
+def PriceChecker(ID):
+    global MONEY
+    global STONE
+    global COAL
+    global IRON
+    global SILICON
+    global QUARTZ
+    global GOLD
+    global RAREMINERAL
 
+    if ((MONEY >= MinerDictionary[ID[0:2]][0][0]) and (STONE >= MinerDictionary[ID[0:2]][0][1]) and (COAL >= MinerDictionary[ID[0:2]][0][2]) and (IRON >= MinerDictionary[ID[0:2]][0][3]) and (SILICON >= MinerDictionary[ID[0:2]][0][4]) and (QUARTZ >= MinerDictionary[ID[0:2]][0][5]) and (GOLD >= MinerDictionary[ID[0:2]][0][6]) and (RAREMINERAL >= MinerDictionary[ID[0:2]][0][7])):
+        MONEY -= MinerDictionary[ID[0:2]][0][0]
+        STONE -= MinerDictionary[ID[0:2]][0][1]
+        COAL -= MinerDictionary[ID[0:2]][0][2]
+        IRON -= MinerDictionary[ID[0:2]][0][3]
+        SILICON -= MinerDictionary[ID[0:2]][0][4]
+        QUARTZ -= MinerDictionary[ID[0:2]][0][5]
+        GOLD -= MinerDictionary[ID[0:2]][0][6]
+        RAREMINERAL -= MinerDictionary[ID[0:2]][0][7]
+        
+        return True 
+    else:
+        return False
 
 
 
@@ -461,7 +539,7 @@ class ButtonObject(pygame.sprite.Sprite):
     def IsGui(self):
         return True
     def Clicked(self):
-        ActionCenter(self.info[5])
+        TaskHandler(self.info[5])
 
 class Market(pygame.sprite.Sprite):
     def __init__(self):
@@ -501,7 +579,50 @@ class MinerSellButtons(pygame.sprite.Sprite):
     def IsGui(self):
         return True
     def Clicked(self):
-        ActionCenter(self.info[5])
+        TaskHandler(self.info[5])
+
+class Miner(pygame.sprite.Sprite):
+    #Miner Attributes
+    #[Miner ID (#Planet (DECR) + #Miner Class (LMH) + Number), Random Value (int 0-59)]
+    #1 Cycle = 1 Second = 60 Frames
+    def __init__(self, ID, Offset):
+        global MinerDictionary
+        super().__init__()
+        self.ID = ID
+        self.type = ID[0:2]
+        self.offset = Offset
+        self.yields = MinerDictionary[self.type][1]
+        self.cycle = MinerDictionary[self.type][2]
+        print (Offset)
+    def Mine(self):
+        global CLOCK
+        global STONE
+        global COAL
+        global IRON
+        global SILICON
+        global QUARTZ
+        global GOLD
+        global RAREMINERAL
+
+        if ((CLOCK+self.offset)%self.cycle == 0):
+            if random.random() < self.yields[0]:
+                STONE += 1
+            if random.random() < self.yields[1]:
+                COAL += 1
+            if random.random() < self.yields[2]:
+                IRON += 1
+            if random.random() < self.yields[3]:
+                SILICON += 1
+            if random.random() < self.yields[4]:
+                QUARTZ += 1
+            if random.random() < self.yields[5]:
+                GOLD += 1
+            if random.random() < self.yields[6]:
+                RAREMINERAL += 1
+                
+                
+        
+
 
 #Planets
 #To add a planet create an info vairable, create an object, add that object to planet_list
@@ -702,6 +823,9 @@ while True:
             displaysurface.blit(entity.surf, entity.rect)
             entity.Update()
         MarketDrawer()
+
+    for mObject in Miners:
+        mObject.Mine()
 
     MineralDrawer.Update()
     #Handles clock and sprite refreshing, to help improve performance updating disables after each half second
