@@ -85,8 +85,11 @@ Font designed by CodeMan38
 
 Getting the proper data based off string names, I know, Ita a janky way of doing things but it works
 
-  
-  
+
+
+[https://www.geeksforgeeks.org/how-to-create-a-list-of-object-in-python-class/](https://www.geeksforgeeks.org/how-to-create-a-list-of-object-in-python-class/)  
+
+The miner are all objects created during runtime, this is how I got that to work.  
 
 *The feature I attempted to create ended up being removed, and I did not end up using those resources. I did, however, decide to keep them in the resource document
 > Written with [StackEdit](https://stackedit.io/).

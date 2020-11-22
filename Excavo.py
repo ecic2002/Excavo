@@ -1,7 +1,9 @@
 import pygame
-import sys
+import sys, os
 import math
 from pygame.locals import *
+
+
  
 pygame.init()
 vec = pygame.math.Vector2  # 2 for two dimensional
@@ -28,9 +30,11 @@ RAREMINERAL = 0
 # #Key;MiniPlanets = ["Directory of Image", Width, Height, Orbit Radius, Speed, Trail Color, Trail Lenght, FocusMode, Name]
 #For trail lenght, 2 is about half, less is longer, higher is shorter, Make sure direction and length match!
 SunInfo = ["Resources/MiniPlanets/Sun.png",200,200,0,0,(0,0,0), 0, False, "Sun"]
-RedPlanetInfo = ["Resources/MiniPlanets/RedPlanet.png",100,100,400,-0.5,(102,69,71), -3, False, "Red Planet"]
-EmiPlanetInfo = ["Resources/MiniPlanets/EmiPlanet.png",100,100,300,-1,(200,200,200), -2, False, "Cow Planet"]
-ChetoPlanetInfo = ["Resources/MiniPlanets/ChetoPlanet.png",250,250,1000,1,(200,69,71), 4, False, "Cheto Planet"]
+DitheaPlanetInfo = ["Resources/MiniPlanets/DitheaPlanet.png",120,120,550,-0.5,(27,110,13), -3, False, "Dithea"]
+EurusPlanetInfo = ["Resources/MiniPlanets/EurusPlanet.png",100,100,800,-1,(191,191,191), -2, False, "Eurus"]
+CrystinePlanetInfo = ["Resources/MiniPlanets/CrystinePlanet.png",60,60,1000,1,(188,255,237), 4, False, "Crystine"]
+RunothPlanetInfo = ["Resources/MiniPlanets/RunothPlanet.png",100,100,300,1,(191,46,69), 4, False, "Runoth"]
+
 
 #PlanetDescriptor
 #Key;MiniPlanets = [Who It is Describing, Link to Description, BKG Color, BKG Opacity, Text Color, Active]
@@ -238,7 +242,7 @@ class MiniPlanet(pygame.sprite.Sprite):
         global ZLOCATION
         global EASE
         global EVENTRESIZE
-        #This allows a planet to be foucesed on, ZLOCATION acts an offset tool, The feect looks like the camera is moving, but in reality all the planets actually are
+        #This allows a planet to be foucesed on, ZLOCATION acts an offset tool, The effect looks like the camera is moving, but in reality all the planets actually are
         if self.info[7]:
             if (EASE >= 1):
                 ZLOCATION[0] = -(SFACTOR*ZFACTOR*self.info[3]*(math.cos(Clock*self.info[4]/360))+(SFACTOR*ZFACTOR*self.info[1]*WIDTH/HEIGHT*OFFSET))
@@ -288,7 +292,7 @@ class MiniPlanet(pygame.sprite.Sprite):
     #These are the defenitions for handeling focusing, mainly just change and read the variable
     def FocusToggle(self):
         if (self.info[7]):
-            wself.info[7] = False
+            self.info[7] = False
         else:
             self.info[7] = True
     def FocusSet(self, SetTo):
@@ -476,18 +480,44 @@ class Market(pygame.sprite.Sprite):
     def Clicked(self):
         print("I was clicked")
 
+class MinerSellButtons(pygame.sprite.Sprite):
+    def __init__(self, Info):
+        super().__init__()
+        self.info = Info
+        self.surf = pygame.image.load(Info[0]).convert_alpha()
+        self.rect = self.surf.get_rect()
+        self.rect.topleft = (int(Info[1]*SFACTOR),int(Info[2]*SFACTOR))
+    def Update(self):
+        if self.info[11] == "CornerLeft":
+            self.surf = pygame.image.load(self.info[0]).convert_alpha()
+            self.surf = pygame.transform.smoothscale(self.surf, (int(self.info[3]*SFACTOR),int(self.info[4]*SFACTOR)))
+            self.rect = self.surf.get_rect()
+            self.rect.topleft = (int(self.info[1]*SFACTOR),int(self.info[2]*SFACTOR))
+        elif self.info[11] == "Center":
+            self.surf = pygame.image.load(self.info[0]).convert_alpha()
+            self.surf = pygame.transform.smoothscale(self.surf, (int(self.info[3]*SFACTOR),int(self.info[4]*SFACTOR)))
+            self.rect = self.surf.get_rect()
+            self.rect.center = (int((WIDTH/2)+(self.info[1]*SFACTOR)),int((HEIGHT/2)+(self.info[2]*SFACTOR)))
+    def IsGui(self):
+        return True
+    def Clicked(self):
+        ActionCenter(self.info[5])
+
 #Planets
 #To add a planet create an info vairable, create an object, add that object to planet_list
 Sun = MiniPlanet(SunInfo)
-RedPlanet = MiniPlanet(RedPlanetInfo)
-EmiPlanet = MiniPlanet(EmiPlanetInfo)
-ChetoPlanet = MiniPlanet(ChetoPlanetInfo)
+DitheaPlanet = MiniPlanet(DitheaPlanetInfo)
+EurusPlanet = MiniPlanet(EurusPlanetInfo)
+CrystinePlanet = MiniPlanet(CrystinePlanetInfo)
+RunothPlanet = MiniPlanet(RunothPlanetInfo)
+
 #Add to Planet List
 planet_list = pygame.sprite.Group()
 planet_list.add(Sun)
-planet_list.add(RedPlanet)
-planet_list.add(EmiPlanet)
-planet_list.add(ChetoPlanet)
+planet_list.add(DitheaPlanet)
+planet_list.add(EurusPlanet)
+planet_list.add(CrystinePlanet)
+planet_list.add(RunothPlanet)
 
 #Renderer for all non planets
 SunDescriptor = Descriptor(SunData)
@@ -546,9 +576,10 @@ ClickableEntities = pygame.sprite.Group()
 ClickableEntities.add(MarketButton)
 ClickableEntities.add(SettingsButton)
 ClickableEntities.add(HelpButton)
-ClickableEntities.add(RedPlanet)
-ClickableEntities.add(EmiPlanet)
-ClickableEntities.add(ChetoPlanet)
+ClickableEntities.add(DitheaPlanet)
+ClickableEntities.add(EurusPlanet)
+ClickableEntities.add(CrystinePlanet)
+ClickableEntities.add(RunothPlanet)
 
 MineralDrawer = MineralDraw()
 #Main Game loop
