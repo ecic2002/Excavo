@@ -3,6 +3,7 @@ import sys, os
 import math
 from pygame.locals import *
 import random
+import shelve
 
  
 pygame.init()
@@ -16,34 +17,30 @@ SFACTOR = 1
 FPS = 60
 FULLSCREEN = False
 
-#Game Data
-MONEY = 25000
-STONE = 100
-COAL = 20
-IRON = 0
-SILICON = 0
-QUARTZ = 0
-GOLD = 0
-RAREMINERAL = 0
+#Start Save Game
+SaveGame = "Save1"
+try:
+    SaveData = shelve.open(SaveGame)
+except:
+    print("Missing Save File")
+    pygame.quit()
+    sys.exit()
 
-#Planets
-# #Key;MiniPlanets = ["Directory of Image", Width, Height, Orbit Radius, Speed, Trail Color, Trail Lenght, FocusMode, Name]
-#For trail lenght, 2 is about half, less is longer, higher is shorter, Make sure direction and length match!
-SunInfo = ["Resources/MiniPlanets/Sun.png",200,200,0,0,(0,0,0), 0, False, "Sun"]
-DitheaPlanetInfo = ["Resources/MiniPlanets/DitheaPlanet.png",120,120,550,-0.5,(32,186,102), -3, False, "Dithea"]
-EurusPlanetInfo = ["Resources/MiniPlanets/EurusPlanet.png",100,100,800,-1,(191,191,191), -2, False, "Eurus"]
-CrystinePlanetInfo = ["Resources/MiniPlanets/CrystinePlanet.png",60,60,1000,1,(188,255,237), 4, False, "Crystine"]
-RunothPlanetInfo = ["Resources/MiniPlanets/RunothPlanet.png",100,100,300,1,(191,46,69), 4, False, "Runoth"]
+#How to restart the game
+RESET = False
 
-#Miner Object Lists
-Miners = []
-
-#Dictionary Setup
-#[[Cost], [Percent Yields], Cycle, Owned]
-# Cost is an int Value [Money, Stone, Coal, Iron, Silicon, Quartz, Gold, Rare Mineral]
-# Percent Yield is what chance an item is chosen for a cycle [Stone, Coal, Iron, Silicon, Quartz, Gold, Rare Mineral]
-# Cycle is the number of frames between mine +1 i.e. 1 is every frame, 60 is about every second
-MinerDictionary = {
+if RESET:
+    MONEY = 200
+    STONE = 100
+    COAL = 20
+    IRON = 0
+    SILICON = 0
+    QUARTZ = 0
+    GOLD = 0
+    RAREMINERAL = 0
+    ID = 1
+    Miners = []
+    MinerDictionary = {
     "DL" : [[100,50,20,0,0,0,0,0], [0.5, 0.1, 0.01, 0, 0, 0, 0], 30, 0],
     "DM" : [[250,60,40,0,0,0,0,0], [0.6, 0.2, 0.03, 0.05, 0, 0, 0], 15, 0],
     "DH" : [[500,100,60,0,5,0,0,0], [0.7, 0.2, 0.1, 0.03, 0.02, 0, 0], 40, 0],
@@ -59,10 +56,99 @@ MinerDictionary = {
     "RL" : [[20000,0,0,0,0,0,0,10], [0.68, 0, 0.1, 0.3, 0.2, 0.05, 0.02], 40, 0],
     "RM" : [[40000,0,0,0,0,0,0,20], [0.7, 0.05, 0.1, 0.3, 0.2, 0.05, 0.02], 20, 0],
     "RH" : [[80000,0,0,600,0,0,0,30], [1, 1, 0.2, 0.8, 0.7, 0.2, 0.1], 120, 0],
-}
+    }
+else:
+    #Game Data
+    MONEY = SaveData['MONEY']
+    STONE = SaveData['STONE']
+    COAL = SaveData['COAL']
+    IRON = SaveData['IRON']
+    SILICON = SaveData['SILICON']
+    QUARTZ = SaveData['QUARTZ']
+    GOLD = SaveData['GOLD']
+    RAREMINERAL = SaveData['RAREMINERAL']
+    #Miner Object Lists, must be rebuilt
+    ID = 1
+    Miners = []
+    #Dictionary with all atributes
+    MinerDictionary = SaveData['MinerDictionary']
 
-#How to offset costs and everything
-DataLocations = []
+
+#Class need to go here so I can rebuild the Miners from Save
+class Miner(pygame.sprite.Sprite):
+    #Miner Attributes
+    #[Miner ID (#Planet (DECR) + #Miner Class (LMH) + Number), Random Value (int 0-59)]
+    #1 Cycle = 1 Second = 60 Frames
+    def __init__(self, ID, Offset):
+        global MinerDictionary
+        super().__init__()
+        self.ID = ID
+        self.type = ID[0:2]
+        self.offset = Offset
+        self.yields = MinerDictionary[self.type][1]
+        self.cycle = MinerDictionary[self.type][2]
+        print (Offset)
+    def Mine(self):
+        global CLOCK
+        global STONE
+        global COAL
+        global IRON
+        global SILICON
+        global QUARTZ
+        global GOLD
+        global RAREMINERAL
+
+        if ((CLOCK+self.offset)%self.cycle == 0):
+            if random.random() < self.yields[0]:
+                STONE += 1
+            if random.random() < self.yields[1]:
+                COAL += 1
+            if random.random() < self.yields[2]:
+                IRON += 1
+            if random.random() < self.yields[3]:
+                SILICON += 1
+            if random.random() < self.yields[4]:
+                QUARTZ += 1
+            if random.random() < self.yields[5]:
+                GOLD += 1
+            if random.random() < self.yields[6]:
+                RAREMINERAL += 1
+
+if not RESET:
+    for t in MinerDictionary:
+        for m in range(MinerDictionary[t][3]):
+            MinerID = t
+            MinerID += str(ID)
+            ID += 1
+            Miners.append(Miner(MinerID, random.randint(0,59)))
+
+#Save and quit the game
+def SaveNQuit(Save):
+    if Save:
+        print("Goodbye!")
+        SaveData['MONEY'] = MONEY
+        SaveData['STONE'] = STONE
+        SaveData['COAL'] = COAL
+        SaveData['IRON'] = IRON
+        SaveData['SILICON'] = SILICON
+        SaveData['QUARTZ'] = QUARTZ
+        SaveData['GOLD'] = GOLD
+        SaveData['RAREMINERAL'] = RAREMINERAL
+        SaveData['MinerDictionary'] = MinerDictionary
+        SaveData.close()
+        print("File Saved")
+        pygame.quit()
+        sys.exit()
+
+
+#Planets
+# #Key;MiniPlanets = ["Directory of Image", Width, Height, Orbit Radius, Speed, Trail Color, Trail Lenght, FocusMode, Name]
+#For trail lenght, 2 is about half, less is longer, higher is shorter, Make sure direction and length match!
+SunInfo = ["Resources/MiniPlanets/Sun.png",200,200,0,0,(0,0,0), 0, False, "Sun"]
+DitheaPlanetInfo = ["Resources/MiniPlanets/DitheaPlanet.png",120,120,550,-0.5,(32,186,102), -3, False, "Dithea"]
+EurusPlanetInfo = ["Resources/MiniPlanets/EurusPlanet.png",100,100,800,-1,(191,191,191), -2, False, "Eurus"]
+CrystinePlanetInfo = ["Resources/MiniPlanets/CrystinePlanet.png",60,60,1000,1,(188,255,237), 4, False, "Crystine"]
+RunothPlanetInfo = ["Resources/MiniPlanets/RunothPlanet.png",100,100,300,1,(191,46,69), 4, False, "Runoth"]
 
 #PlanetDescriptor
 #DEPRECIATED
@@ -109,7 +195,6 @@ RLBtnInf = ["Resources/Visuals/BuyMiner.png", 426, -199, 59, 29, "New Runoth T1"
 RMBtnInf = ["Resources/Visuals/BuyMiner.png", 426, -76, 59, 29, "New Runoth T2", True, True, True, True, "Runoth", "Miner"]
 RHBtnInf = ["Resources/Visuals/BuyMiner.png", 426, 47, 59, 29, "New Runoth T3", True, True, True, True, "Runoth", "Miner"]
 
-#[-199, -76, 47] , -50
 #Market Builder
 SellPrices = [10, 15, 50, 110, 160, 430, 2800]
 BuyPrices = [25, 35, 90, 280, 340, 880, 6300]
@@ -130,7 +215,6 @@ OFFSET = 0.8 #Left Right planet offeset when focused
 ZLOCATION = [0,0]
 FOCUSACTIVE = True
 MARKETENABLE = False
-ID = 1
 #Gamestate allows for porper components to be on screen, 0 for no focus, 1 for focusing, 2 for focused, 3 for defocusing
 GAMESTATE = 0
 EASE = 1 #Creates Smoother Trasitions
@@ -147,6 +231,7 @@ font1 = pygame.font.Font('PressStart2P-Regular.ttf', 20)
 #Depreciated
 #TARGET = 0
 
+#Main Functions
 def TaskHandler(Action):
     global MONEY
     global STONE
@@ -319,11 +404,6 @@ def PriceChecker(ID):
     else:
         return False
 
-def SaveNQuit(Save):
-    if Save:
-        print("Goodbye!")
-        pygame.quit()
-        sys.exit()
 
 #Object classes
 class MiniPlanet(pygame.sprite.Sprite):
@@ -643,51 +723,10 @@ class MinerSellButtons(pygame.sprite.Sprite):
                     rect = surf.get_rect()
                     rect.center = (int(WIDTH*(3/4)+(OffsetsYield[y]*SFACTOR)), int((HEIGHT*0.5)+(OffsetSeperate[v]*SFACTOR)))
                     displaysurface.blit(surf, rect)
-
-
     def IsGui(self):
         return True
     def Clicked(self):
         TaskHandler(self.info[5])
-
-class Miner(pygame.sprite.Sprite):
-    #Miner Attributes
-    #[Miner ID (#Planet (DECR) + #Miner Class (LMH) + Number), Random Value (int 0-59)]
-    #1 Cycle = 1 Second = 60 Frames
-    def __init__(self, ID, Offset):
-        global MinerDictionary
-        super().__init__()
-        self.ID = ID
-        self.type = ID[0:2]
-        self.offset = Offset
-        self.yields = MinerDictionary[self.type][1]
-        self.cycle = MinerDictionary[self.type][2]
-        print (Offset)
-    def Mine(self):
-        global CLOCK
-        global STONE
-        global COAL
-        global IRON
-        global SILICON
-        global QUARTZ
-        global GOLD
-        global RAREMINERAL
-
-        if ((CLOCK+self.offset)%self.cycle == 0):
-            if random.random() < self.yields[0]:
-                STONE += 1
-            if random.random() < self.yields[1]:
-                COAL += 1
-            if random.random() < self.yields[2]:
-                IRON += 1
-            if random.random() < self.yields[3]:
-                SILICON += 1
-            if random.random() < self.yields[4]:
-                QUARTZ += 1
-            if random.random() < self.yields[5]:
-                GOLD += 1
-            if random.random() < self.yields[6]:
-                RAREMINERAL += 1
                 
 
 #Planets
@@ -880,19 +919,20 @@ while True:
                         elif not WASGUI:
                             TARGET = entity
                     #If clicked on self
-                    if (TARGET.info[7]) and not WASGUI:
-                        TARGET.FocusSet(False)
-                        FOCUSACTIVE = False
-                        EASE = 0
-                        GAMESTATE = 3
-                    #If clicked on another planet
-                    elif not WASGUI:
-                        for entity in planet_list:
-                            entity.FocusSet(False)
-                        TARGET.FocusSet(True)
-                        EASE = 0
-                        FOCUSACTIVE = True
-                        GAMESTATE = 1                            
+                        if not WASGUI:
+                            if (TARGET.info[7]):
+                                TARGET.FocusSet(False)
+                                FOCUSACTIVE = False
+                                EASE = 0
+                                GAMESTATE = 3
+                            #If clicked on another planet
+                            else:
+                                for entity in planet_list:
+                                    entity.FocusSet(False)
+                                TARGET.FocusSet(True)
+                                EASE = 0
+                                FOCUSACTIVE = True
+                                GAMESTATE = 1                            
                 #EmptySpace was clicked
                 else:
                     if FOCUSACTIVE and not WASGUI:
@@ -968,7 +1008,8 @@ while True:
         WIDTH = displaysurface.get_width()
         HEIGHT = displaysurface.get_height()
 
-    print(str(int(FramePerSec.get_fps())))
+    #Uncomment for FPS counter
+    #print(str(int(FramePerSec.get_fps())))
 
     # MONEY = CLOCK*89
     # RAREMINERAL = int(23982893*math.sin(CLOCK/334))

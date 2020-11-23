@@ -91,6 +91,12 @@ Getting the proper data based off string names, I know, Ita a janky way of doing
 
 The miner are all objects created during runtime, this is how I got that to work.  
 
+
+
+[https://inventwithpython.com/blog/2012/05/03/implement-a-save-game-feature-in-python-with-the-shelve-module/](https://inventwithpython.com/blog/2012/05/03/implement-a-save-game-feature-in-python-with-the-shelve-module/)
+
+Started to look into how to properly do save files. Apperantyl using just a text dumcent isnt a great approach
+
 *The feature I attempted to create ended up being removed, and I did not end up using those resources. I did, however, decide to keep them in the resource document
 
 
