@@ -17,9 +17,9 @@ FPS = 60
 FULLSCREEN = False
 
 #Game Data
-MONEY = 100000
+MONEY = 25000
 STONE = 100
-COAL = 10
+COAL = 20
 IRON = 0
 SILICON = 0
 QUARTZ = 0
@@ -39,26 +39,26 @@ RunothPlanetInfo = ["Resources/MiniPlanets/RunothPlanet.png",100,100,300,1,(191,
 Miners = []
 
 #Dictionary Setup
-#[[Cost], [Percent Yields], Cycle]
+#[[Cost], [Percent Yields], Cycle, Owned]
 # Cost is an int Value [Money, Stone, Coal, Iron, Silicon, Quartz, Gold, Rare Mineral]
 # Percent Yield is what chance an item is chosen for a cycle [Stone, Coal, Iron, Silicon, Quartz, Gold, Rare Mineral]
 # Cycle is the number of frames between mine +1 i.e. 1 is every frame, 60 is about every second
 MinerDictionary = {
-    "DL" : [[100,50,20,0,0,0,0,0], [0.7, 0.2, 0.1, 0, 0, 0, 0], 30],
-    "DM" : [[0,0,0,0,0,0,0,0], [0.7, 0.2, 0.1, 0, 0, 0, 0], 20],
-    "DH" : [[0,0,0,0,0,0,0,0], [0.7, 0.2, 0.1, 0, 0, 0, 0], 10],
+    "DL" : [[100,50,20,0,0,0,0,0], [0.5, 0.1, 0.01, 0, 0, 0, 0], 30, 0],
+    "DM" : [[250,60,40,0,0,0,0,0], [0.6, 0.2, 0.03, 0.05, 0, 0, 0], 15, 0],
+    "DH" : [[500,100,60,0,5,0,0,0], [0.7, 0.2, 0.1, 0, 0, 0, 0], 40, 0],
 
-    "EL" : [[0,0,0,0,0,0,0,0], [0.7, 0.2, 0.1, 0, 0, 0, 0], 30],
-    "EM" : [[0,0,0,0,0,0,0,0], [0.7, 0.2, 0.1, 0, 0, 0, 0], 30],
-    "EH" : [[0,0,0,0,0,0,0,0], [0.7, 0.2, 0.1, 0, 0, 0, 0], 30],
+    "EL" : [[1000,0,0,0,0,0,0,0], [0.2, 0.4, 0.1, 0, 0, 0, 0], 60, 0],
+    "EM" : [[2000,0,0,0,0,0,0,0], [0.3, 0.5, 0.1, 0, 0, 0, 0], 30, 0],
+    "EH" : [[4000,0,0,0,0,0,0,0], [0.2, 0.6, 0.1, 0, 0, 0, 0], 10, 0],
 
-    "CL" : [[0,0,0,0,0,0,0,0], [0.7, 0.2, 0.1, 0, 0, 0, 0], 30],
-    "CM" : [[0,0,0,0,0,0,0,0], [0.7, 0.2, 0.1, 0, 0, 0, 0], 30],
-    "CH" : [[0,0,0,0,0,0,0,0], [0.7, 0.2, 0.1, 0, 0, 0, 0], 30],
+    "CL" : [[8000,0,0,0,0,0,0,0], [0.7, 0.2, 0.1, 0, 0, 0, 0], 30, 0],
+    "CM" : [[8000,0,0,0,0,0,0,0], [0.7, 0.2, 0.1, 0, 0, 0, 0], 30, 0],
+    "CH" : [[16000,0,0,0,0,0,0,0], [0.7, 0.2, 0.1, 0, 0, 0, 0], 30, 0],
 
-    "RL" : [[0,0,0,0,0,0,0,0], [0.7, 0.2, 0.1, 0, 0, 0, 0], 30],
-    "RM" : [[0,0,0,0,0,0,0,0], [0.7, 0.2, 0.1, 0, 0, 0, 0], 30],
-    "RH" : [[0,0,0,0,0,0,0,0], [0.7, 0.2, 0.1, 0, 0, 0, 0], 30],
+    "RL" : [[20000,0,0,0,0,0,0,0], [0.7, 0.2, 0.1, 0, 0, 0, 0], 30, 0],
+    "RM" : [[40000,0,0,0,0,0,0,0], [0.7, 0.2, 0.1, 0, 0, 0, 0], 30, 0],
+    "RH" : [[80000,0,0,0,0,0,0,0], [0.7, 0.2, 0.1, 0, 0, 0, 0], 30, 0],
 }
 
 #How to offset costs and everything
@@ -95,8 +95,21 @@ GoBuyInf = ["Resources/Visuals/Buy.png", 338, 270, 118, 29, "Buy Gold", True, Tr
 RMSellInf = ["Resources/Visuals/Sell.png", 507, 170, 118, 29, "Sell RareMineral", True, True, True, True, "", "Center"] 
 RMBuyInf = ["Resources/Visuals/Buy.png", 507, 270, 118, 29, "Buy RareMineral", True, True, True, True, "", "Center"]
 
+#All Miner Buy Buttons
+DLBtnInf = ["Resources/Visuals/BuyMiner.png", 426, -199, 59, 29, "New Dithea T1", True, True, True, True, "Dithea", "Miner"]
+DMBtnInf = ["Resources/Visuals/BuyMiner.png", 426, -76, 59, 29, "New Dithea T2", True, True, True, True, "Dithea", "Miner"]
+DHBtnInf = ["Resources/Visuals/BuyMiner.png", 426, 47, 59, 29, "New Dithea T3", True, True, True, True, "Dithea", "Miner"]
+ELBtnInf = ["Resources/Visuals/BuyMiner.png", 426, -199, 59, 29, "New Eurus T1", True, True, True, True, "Eurus", "Miner"]
+EMBtnInf = ["Resources/Visuals/BuyMiner.png", 426, -76, 59, 29, "New Eurus T2", True, True, True, True, "Eurus", "Miner"]
+EHBtnInf = ["Resources/Visuals/BuyMiner.png", 426, 47, 59, 29, "New Eurus T3", True, True, True, True, "Eurus", "Miner"]
+CLBtnInf = ["Resources/Visuals/BuyMiner.png", 426, -199, 59, 29, "New Crystine T1", True, True, True, True, "Crystine", "Miner"]
+CMBtnInf = ["Resources/Visuals/BuyMiner.png", 426, -76, 59, 29, "New Crystine T2", True, True, True, True, "Crystine", "Miner"]
+CHBtnInf = ["Resources/Visuals/BuyMiner.png", 426, 47, 59, 29, "New Crystine T3", True, True, True, True, "Crystine", "Miner"]
+RLBtnInf = ["Resources/Visuals/BuyMiner.png", 426, -199, 59, 29, "New Runoth T1", True, True, True, True, "Runoth", "Miner"]
+RMBtnInf = ["Resources/Visuals/BuyMiner.png", 426, -76, 59, 29, "New Runoth T2", True, True, True, True, "Runoth", "Miner"]
+RHBtnInf = ["Resources/Visuals/BuyMiner.png", 426, 47, 59, 29, "New Runoth T3", True, True, True, True, "Runoth", "Miner"]
 
-
+#[-199, -76, 47] , -50
 #Market Builder
 SellPrices = [10, 15, 50, 110, 160, 430, 2800]
 BuyPrices = [25, 35, 90, 280, 340, 880, 6300]
@@ -260,6 +273,7 @@ def TaskHandler(Action):
             MinerID += "H"
         
         if PriceChecker(MinerID):
+            MinerDictionary[MinerID][3] += 1
             MinerID += str(ID)
             ID += 1
             Miners.append(Miner(MinerID, random.randint(0,59)))
@@ -267,7 +281,6 @@ def TaskHandler(Action):
 
         else:
             print ("Purchase Error")
-
 
 def MarketDrawer():
     FontData3 = pygame.font.Font('PressStart2P-Regular.ttf', int(21*SFACTOR))
@@ -306,7 +319,11 @@ def PriceChecker(ID):
     else:
         return False
 
-
+def SaveNQuit(Save):
+    if Save:
+        print("Goodbye!")
+        pygame.quit()
+        sys.exit()
 
 #Object classes
 class MiniPlanet(pygame.sprite.Sprite):
@@ -433,9 +450,7 @@ class TextDrawer(pygame.sprite.Sprite):
         if (GAMESTATE == 0 or GAMESTATE == 1 or GAMESTATE == 3):
             self.surf = pygame.Surface((int(0),int(0)))
         elif (GAMESTATE == 2):
-            self.surf = font1.render(TARGET.info[8], True, (255,255,255))
-            self.rect = self.surf.get_rect()
-            self.rect.center = (int(WIDTH*(3/4)), int(HEIGHT*0.2))
+            self.surf = pygame.Surface((int(0),int(0)))
             if (TARGET.info[8] == "Dithea"):
                 DitheaButtons.Update()
             elif (TARGET.info[8] == "Eurus"):
@@ -547,6 +562,15 @@ class ButtonObject(pygame.sprite.Sprite):
             self.surf = pygame.transform.smoothscale(self.surf, (int(self.info[3]*SFACTOR),int(self.info[4]*SFACTOR)))
             self.rect = self.surf.get_rect()
             self.rect.center = (int((WIDTH/2)+(self.info[1]*SFACTOR)),int((HEIGHT/2)+(self.info[2]*SFACTOR)))
+        elif self.info[11] == "Miner":
+            if (GAMESTATE == 2) and (TARGET.info[8] == self.info[10]):
+                self.surf = pygame.image.load(self.info[0]).convert()
+                self.surf = pygame.transform.smoothscale(self.surf, (int(self.info[3]*SFACTOR),int(self.info[4]*SFACTOR)))
+                self.rect = self.surf.get_rect()
+                self.rect.center = (int((WIDTH/2)+(self.info[1]*SFACTOR)),int((HEIGHT/2)+(self.info[2]*SFACTOR)))
+            else:
+                self.rect.center = (-2000,-2000)
+            # Hide
     def IsGui(self):
         return True
     def Clicked(self):
@@ -573,9 +597,6 @@ class MinerSellButtons(pygame.sprite.Sprite):
     def __init__(self, PlanetID):
         super().__init__()
         self.id = PlanetID
-        #self.surf = pygame.image.load(Info[0]).convert_alpha()
-        #self.rect = self.surf.get_rect()
-        #self.rect.topleft = (int(Info[1]*SFACTOR),int(Info[2]*SFACTOR))
         self.Imgsurf = pygame.image.load("Resources/Visuals/" + self.id + "Menu.png").convert_alpha()
     def Update(self):
         if (True):
@@ -586,7 +607,6 @@ class MinerSellButtons(pygame.sprite.Sprite):
             Classes = ["L","M","H"]
             fontMenu = pygame.font.Font('PressStart2P-Regular.ttf', int(14*SFACTOR) )
             Imgsurf = self.Imgsurf
-            Imgsurf = pygame.image.load("Resources/Visuals/" + self.id + "Menu.png").convert_alpha()
             Imgsurf = pygame.transform.smoothscale(Imgsurf, (int(1920*SFACTOR),int(1080*SFACTOR)))
             Imgrect = Imgsurf.get_rect()
             Imgrect.center = (int((WIDTH/2)),int((HEIGHT/2)))
@@ -594,11 +614,30 @@ class MinerSellButtons(pygame.sprite.Sprite):
 
             for v in range(len(OffsetSeperate)):
                 CurrentData = MinerDictionary[(self.id+Classes[v])]
+
+                #Cycle
+                Cyclesurf = fontMenu.render(str((60/CurrentData[2]))+"/s", True, (255,255,255))
+                Cyclerect = Cyclesurf.get_rect()
+                Cyclerect.center = (int(WIDTH*(3/4)+(-150*SFACTOR)), int((HEIGHT*0.5)+((-27+OffsetSeperate[v])*SFACTOR)))
+                displaysurface.blit(Cyclesurf, Cyclerect)
+
+                #Owned
+                Ownedsurf = fontMenu.render(str(CurrentData[3]), True, (255,255,255))
+                Ownedrect = Ownedsurf.get_rect()
+                Ownedrect.center = (int(WIDTH*(3/4)+(-200*SFACTOR)), int((HEIGHT*0.5)+((5+OffsetSeperate[v])*SFACTOR)))
+                displaysurface.blit(Ownedsurf, Ownedrect)
+
+                #Buy Button
+
+
+                #Purchase
                 for p in range(len(OffsetsPurchase)):
                     surf = fontMenu.render(str(CurrentData[0][p]), True, (255,255,255))
                     rect = surf.get_rect()
                     rect.center = (int(WIDTH*(3/4)+(OffsetsPurchase[p]*SFACTOR)), int((HEIGHT*0.5)+((-27+OffsetSeperate[v])*SFACTOR)))
                     displaysurface.blit(surf, rect)
+
+                #Yields
                 for y in range(len(OffsetsYield)):
                     surf = fontMenu.render(str(int(CurrentData[1][y]*100))+"%", True, (255,255,255))
                     rect = surf.get_rect()
@@ -717,6 +756,33 @@ market_render.add(GoBuyBt)
 market_render.add(RMSellBt)
 market_render.add(RMBuyBt)
 
+#All Miners
+DLBtn = ButtonObject(DLBtnInf)
+DMBtn = ButtonObject(DMBtnInf)
+DHBtn = ButtonObject(DHBtnInf)
+ELBtn = ButtonObject(ELBtnInf)
+EMBtn = ButtonObject(EMBtnInf)
+EHBtn = ButtonObject(EHBtnInf)
+CLBtn = ButtonObject(CLBtnInf)
+CMBtn = ButtonObject(CMBtnInf)
+CHBtn = ButtonObject(CHBtnInf)
+RLBtn = ButtonObject(RLBtnInf)
+RMBtn = ButtonObject(RMBtnInf)
+RHBtn = ButtonObject(RHBtnInf)
+
+render_me.add(DLBtn)
+render_me.add(DMBtn)
+render_me.add(DHBtn)
+render_me.add(ELBtn)
+render_me.add(EMBtn)
+render_me.add(EHBtn)
+render_me.add(CLBtn)
+render_me.add(CMBtn)
+render_me.add(CHBtn)
+render_me.add(RLBtn)
+render_me.add(RMBtn)
+render_me.add(RHBtn)
+
 #Miner Purchase Buttons and Such
 DitheaButtons = MinerSellButtons("D")
 EurusButtons = MinerSellButtons("E")
@@ -734,6 +800,20 @@ ClickableEntities.add(EurusPlanet)
 ClickableEntities.add(CrystinePlanet)
 ClickableEntities.add(RunothPlanet)
 
+#All Miner Buy Buttons
+ClickableEntities.add(DLBtn)
+ClickableEntities.add(DMBtn)
+ClickableEntities.add(DHBtn)
+ClickableEntities.add(ELBtn)
+ClickableEntities.add(EMBtn)
+ClickableEntities.add(EHBtn)
+ClickableEntities.add(CLBtn)
+ClickableEntities.add(CMBtn)
+ClickableEntities.add(CHBtn)
+ClickableEntities.add(RLBtn)
+ClickableEntities.add(RMBtn)
+ClickableEntities.add(RHBtn)
+
 MineralDrawer = MineralDraw()
 #Main Game loop
 while True:
@@ -747,8 +827,7 @@ while True:
     for event in pygame.event.get():
         #Exit Game through x
         if event.type == QUIT:
-            pygame.quit()
-            sys.exit()
+            SaveNQuit(True)
 
         #Resize The Window
         if event.type == pygame.VIDEORESIZE:
@@ -762,8 +841,7 @@ while True:
         if event.type == KEYDOWN:
             #Close game using ESC key
             if event.key == K_ESCAPE:
-                    pygame.quit()
-                    sys.exit()
+                SaveNQuit(True)
             #Go into full screen using f key
             if event.key == K_f:
                 FULLSCREEN = not FULLSCREEN
@@ -802,22 +880,22 @@ while True:
                         elif not WASGUI:
                             TARGET = entity
                     #If clicked on self
-                            if (TARGET.info[7]):
-                                TARGET.FocusSet(False)
-                                FOCUSACTIVE = False
-                                EASE = 0
-                                GAMESTATE = 3
+                    if (TARGET.info[7]) and not WASGUI:
+                        TARGET.FocusSet(False)
+                        FOCUSACTIVE = False
+                        EASE = 0
+                        GAMESTATE = 3
                     #If clicked on another planet
-                            else:
-                                for entity in planet_list:
-                                    entity.FocusSet(False)
-                                TARGET.FocusSet(True)
-                                EASE = 0
-                                FOCUSACTIVE = True
-                                GAMESTATE = 1                            
+                    elif not WASGUI:
+                        for entity in planet_list:
+                            entity.FocusSet(False)
+                        TARGET.FocusSet(True)
+                        EASE = 0
+                        FOCUSACTIVE = True
+                        GAMESTATE = 1                            
                 #EmptySpace was clicked
                 else:
-                    if FOCUSACTIVE:
+                    if FOCUSACTIVE and not WASGUI:
                         FOCUSACTIVE = False
                         EASE = 0
                         for entity in planet_list:
@@ -890,6 +968,7 @@ while True:
         WIDTH = displaysurface.get_width()
         HEIGHT = displaysurface.get_height()
 
+    print(str(int(FramePerSec.get_fps())))
 
     # MONEY = CLOCK*89
     # RAREMINERAL = int(23982893*math.sin(CLOCK/334))
