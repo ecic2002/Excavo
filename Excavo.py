@@ -17,19 +17,38 @@ SFACTOR = 1
 FPS = 60
 FULLSCREEN = False
 
+#Check the reset flag
+#Setting to true will ignore Reset File and force game to bbe reset
+RESET = False
+
+ResetFile = 'Reset.txt'
+try:
+    FlagCheck = open(ResetFile, 'r+')
+    print("Reading Reset File...")
+    if (FlagCheck.readline()[0] == "T"):
+        RESET = True
+        EntireContents = FlagCheck.read()
+        FlagCheck.seek(0)
+        FlagCheck.write("F")
+        FlagCheck.truncate()
+except:
+    print("Missing or Corrupted Reset Flag!")
+    print("Avoiding Game Reset")
+
+
 #Start Save Game
 SaveGame = "Save1"
 try:
     SaveData = shelve.open(SaveGame)
 except:
     print("Missing Save File")
+    FlagCheck.close()
     pygame.quit()
     sys.exit()
 
-#How to restart the game
-RESET = True
-
+#Handle a game reset
 if RESET:
+    print("Resetting The game")
     MONEY = 200
     STONE = 100
     COAL = 20
@@ -42,20 +61,20 @@ if RESET:
     Miners = []
     MinerDictionary = {
     "DL" : [[100,50,20,0,0,0,0,0], [0.5, 0.1, 0.01, 0, 0, 0, 0], 30, 0],
-    "DM" : [[250,60,40,0,0,0,0,0], [0.6, 0.2, 0.03, 0.02, 0, 0, 0], 15, 0],
-    "DH" : [[500,100,60,0,5,0,0,0], [0.7, 0.2, 0.1, 0.03, 0.02, 0, 0], 40, 0],
+    "DM" : [[250,60,40,10,0,0,0,0], [0.6, 0.2, 0.03, 0, 0, 0, 0], 15, 0],
+    "DH" : [[500,100,60,20,0,0,0,0], [0.7, 0.2, 0.1, 0.01, 0, 0, 0], 40, 0],
 
-    "EL" : [[1000,300,0,0,0,0,0,0], [0.2, 0.4, 0.1, 0, 0, 0, 0], 60, 0],
-    "EM" : [[2000,400,0,0,0,0,0,0], [0.3, 0.5, 0.1, 0, 0, 0, 0], 30, 0],
-    "EH" : [[4000,600,0,0,0,0,0,0], [0.2, 0.6, 0.1, 0, 0, 0, 0], 10, 0],
+    "EL" : [[1000,300,100,20,5,0,0,0], [0.2, 0.4, 0.3, 0.01, 0, 0, 0], 60, 0],
+    "EM" : [[2000,400,200,40,10,0,0,0], [0.3, 0.5, 0.4, 0.02, 0.01, 0, 0], 30, 0],
+    "EH" : [[4000,600,300,60,20,5,0,0], [0.2, 0.6, 0.5, 0.03, 0.02, 0, 0], 10, 0],
 
-    "CL" : [[8000,0,0,0,0,0,0,0], [0, 0.2, 0.1, 0, 0, 0, 0], 30, 0],
-    "CM" : [[8000,0,0,0,0,0,0,0], [0, 0.2, 0.1, 0, 0, 0, 0], 30, 0],
-    "CH" : [[16000,0,0,300,200,200,20,40], [0, 0.2, 0.1, 0, 0, 0, 0.2], 30, 0],
+    "CL" : [[8000,0,0,100,120,100,0,0], [0, 0, 0.05, 0.10, 0.05, 0.01, 0], 20, 0],
+    "CM" : [[12000,0,0,150,180,160,5,0], [0, 0, 0.1, 0.4, 0.2, 0.02, 0], 30, 0],
+    "CH" : [[16000,0,0,300,200,200,20,40], [0, 0, 0, 0, 0, 0.04, 0.01], 30, 0],
 
-    "RL" : [[20000,0,0,0,0,0,0,10], [0.68, 0, 0.1, 0.3, 0.2, 0.05, 0.02], 40, 0],
-    "RM" : [[40000,0,0,0,0,0,0,20], [0.7, 0.05, 0.1, 0.3, 0.2, 0.05, 0.02], 20, 0],
-    "RH" : [[80000,0,0,600,0,0,0,30], [1, 1, 0.2, 0.8, 0.7, 0.2, 0.1], 120, 0],
+    "RL" : [[20000,0,40,300,200,200,50,10], [0.68, 0, 0.1, 0.3, 0.2, 0.05, 0.02], 40, 0],
+    "RM" : [[40000,0,40,300,200,200,50,20], [0.7, 0.05, 0.1, 0.3, 0.2, 0.05, 0.03], 20, 0],
+    "RH" : [[80000,20,80,600,400,400,100,30], [1, 1, 0.2, 0.8, 0.7, 0.2, 0.04], 120, 0],
     }
 else:
     #Game Data
@@ -72,6 +91,7 @@ else:
     Miners = []
     #Dictionary with all atributes
     MinerDictionary = SaveData['MinerDictionary']
+    print("No Reset, Loaded save game")
 
 
 #Class need to go here so I can rebuild the Miners from Save
@@ -87,7 +107,6 @@ class Miner(pygame.sprite.Sprite):
         self.offset = Offset
         self.yields = MinerDictionary[self.type][1]
         self.cycle = MinerDictionary[self.type][2]
-        print (Offset)
     def Mine(self):
         global CLOCK
         global STONE
@@ -136,6 +155,7 @@ def SaveNQuit(Save):
         SaveData['RAREMINERAL'] = RAREMINERAL
         SaveData['MinerDictionary'] = MinerDictionary
         SaveData.close()
+        FlagCheck.close()
         print("File Saved")
         pygame.quit()
         sys.exit()
@@ -198,8 +218,8 @@ RMBtnInf = ["Resources/Visuals/BuyMiner.png", 426, -76, 59, 29, "New Runoth T2",
 RHBtnInf = ["Resources/Visuals/BuyMiner.png", 426, 47, 59, 29, "New Runoth T3", True, True, True, True, "Runoth", "Miner"]
 
 #Market Builder
-SellPrices = [10, 15, 50, 110, 160, 430, 2800]
-BuyPrices = [25, 35, 90, 280, 340, 880, 6300]
+SellPrices = [2, 10, 30, 80, 100, 430, 2800]
+BuyPrices = [5, 15, 60, 140, 240, 880, 6300]
 
 DefaultLocationSell = [[-507, 110],[-338, 110],[-170, 110],[0, 110],[170, 110],[338, 110],[507, 110]]
 DefaultLocationBuy = [[-507, 210],[-338, 210],[-170, 210],[0, 210],[170, 210],[338, 210],[507, 210]]
@@ -252,61 +272,104 @@ def TaskHandler(Action):
             if MONEY >= BuyPrices[0] * MARKETMULT:
                 MONEY -= BuyPrices[0] * MARKETMULT
                 STONE +=1 * MARKETMULT
+                Success()
+            else:
+                Fail()
         if "Coal" in Action:
             if MONEY >= BuyPrices[1] * MARKETMULT:
                 MONEY -= BuyPrices[1] * MARKETMULT
                 COAL +=1 * MARKETMULT
+                Success()
+            else:
+                Fail()
         if "Iron" in Action:
             if MONEY >= BuyPrices[2] * MARKETMULT:
                 MONEY -= BuyPrices[2] * MARKETMULT
                 IRON +=1 * MARKETMULT
+                Success()
+            else:
+                Fail()
         if "Silicon" in Action:
             if MONEY >= BuyPrices[3] * MARKETMULT:
                 MONEY -= BuyPrices[3] * MARKETMULT
                 SILICON +=1 * MARKETMULT
+                Success()
+            else:
+                Fail()
         if "Quartz" in Action:
             if MONEY >= BuyPrices[4] * MARKETMULT:
                 MONEY -= BuyPrices[4] * MARKETMULT
                 QUARTZ +=1 * MARKETMULT
+                Success()
+            else:
+                Fail()
         if "Gold" in Action:
             if MONEY >= BuyPrices[5] * MARKETMULT:
                 MONEY -= BuyPrices[5] * MARKETMULT
                 GOLD +=1 * MARKETMULT
+                Success()
+            else:
+                Fail()
         if "RareMineral" in Action:
             if MONEY >= BuyPrices[6] * MARKETMULT:
                 MONEY -= BuyPrices[6] * MARKETMULT
                 RAREMINERAL +=1 * MARKETMULT
+                Success()
+            else:
+                Fail()
     elif "Sell" in Action:
         if "Stone" in Action:
             if STONE >= 1 * MARKETMULT:
                 MONEY += SellPrices[0] * MARKETMULT
                 STONE -=1 * MARKETMULT
+                Success()
+            else:
+                Fail()
         if "Coal" in Action:
             if COAL >= 1 * MARKETMULT:
                 MONEY += SellPrices[1] * MARKETMULT
                 COAL -=1 * MARKETMULT
+                Success()
+            else:
+                Fail()
         if "Iron" in Action:
             if IRON >= 1 * MARKETMULT:
                 MONEY += SellPrices[2] * MARKETMULT
                 IRON -=1 * MARKETMULT
+                Success()
+            else:
+                Fail()
         if "Silicon" in Action:
             if SILICON >= 1 * MARKETMULT:
                 MONEY += SellPrices[3] * MARKETMULT
                 SILICON -=1 * MARKETMULT
+                Success()
+            else:
+                Fail()
         if "Quartz" in Action:
             if QUARTZ >= 1 * MARKETMULT:
                 MONEY += SellPrices[4] * MARKETMULT
                 QUARTZ -=1 * MARKETMULT
+                Success()
+            else:
+                Fail()
         if "Gold" in Action:
             if GOLD >= 1 * MARKETMULT:
                 MONEY += SellPrices[5] * MARKETMULT
                 GOLD -=1 * MARKETMULT
+                Success()
+            else:
+                Fail()
         if "RareMineral" in Action:
             if RAREMINERAL >= 1 * MARKETMULT:
                 MONEY += SellPrices[6] * MARKETMULT
                 RAREMINERAL -=1 * MARKETMULT
+                Success()
+            else:
+                Fail()
     elif "Toggle" in Action:
         ToggleMe = Action.replace("Toggle ", "")
+        Settings()
         if (globals()[ToggleMe]):
             globals()[ToggleMe] = False
         else: 
@@ -371,19 +434,24 @@ def TaskHandler(Action):
             MinerID += str(ID)
             ID += 1
             Miners.append(Miner(MinerID, random.randint(0,59)))
-            print (MinerID)
-
+            Success()
         else:
-            print ("Purchase Error")
+            Fail()
 
     elif "Increment" in Action:
         EditMe = Action.replace("Increment ", "")
         if (globals()[EditMe]<100):
             globals()[EditMe] += 1
+            Settings()
+        else:
+            Fail()
     elif "Decrement" in Action:
         EditMe = Action.replace("Decrement ", "")
         if (globals()[EditMe]>1):
             globals()[EditMe] -= 1
+            Settings()
+        else:
+            Fail()
 
 def MarketDrawer():
     FontDataS = pygame.font.Font('PressStart2P-Regular.ttf', int(13*SFACTOR))
@@ -446,6 +514,9 @@ def Success():
 def Fail():
     #Play fail sound
     print("Action Fail")
+
+def Settings():
+    print("Action Occured")
 
 #Object classes
 class MiniPlanet(pygame.sprite.Sprite):
@@ -714,7 +785,7 @@ class Market(pygame.sprite.Sprite):
         return True
 
     def Clicked(self):
-        print("I was clicked")
+        pass
 
 class MinerSellButtons(pygame.sprite.Sprite):
     def __init__(self, PlanetID):

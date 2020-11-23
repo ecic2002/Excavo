@@ -97,6 +97,12 @@ The miner are all objects created during runtime, this is how I got that to work
 
 Started to look into how to properly do save files. Apperantyl using just a text dumcent isnt a great approach
 
+
+
+[https://www.kite.com/python/answers/how-to-update-and-replace-text-in-a-file-in-python](https://www.kite.com/python/answers/how-to-update-and-replace-text-in-a-file-in-python)
+
+Needed for flag that resets the game
+
 *The feature I attempted to create ended up being removed, and I did not end up using those resources. I did, however, decide to keep them in the resource document
 
 
