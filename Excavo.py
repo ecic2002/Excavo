@@ -167,7 +167,7 @@ SunInfo = ["Resources/MiniPlanets/Sun.png",200,200,0,0,(0,0,0), 0, False, "Sun"]
 DitheaPlanetInfo = ["Resources/MiniPlanets/DitheaPlanet.png",120,120,550,-0.5,(32,186,102), -3, False, "Dithea"]
 EurusPlanetInfo = ["Resources/MiniPlanets/EurusPlanet.png",100,100,800,-1,(191,191,191), -2, False, "Eurus"]
 CrystinePlanetInfo = ["Resources/MiniPlanets/CrystinePlanet.png",60,60,1000,1,(188,255,237), 4, False, "Crystine"]
-RunothPlanetInfo = ["Resources/MiniPlanets/RunothPlanet.png",100,100,300,1,(191,46,69), 4, False, "Runoth"]
+RunothPlanetInfo = ["Resources/MiniPlanets/RunothPlanet.png",100,100,300,0.7,(191,46,69), 4, False, "Runoth"]
 
 #PlanetDescriptor
 #DEPRECIATED
@@ -181,8 +181,8 @@ MoneyInfo = ["Money: ","MONEY", 30, 0.01, 0.01, (255,255,255), True, True, True,
 #Buttons
 #Key; [Image link, Default x, Defaul y, Width, Height, Action, Enable0, Enable1, Enable2, Enable3, Planet]
 MarketButtonInfo = ["Resources/Visuals/MarketLogo.png", 16, 221, 66, 66, "Toggle MARKETENABLE", True, True, True, True, "", "CornerLeft"]
-SettingsButtonInfo = ["Resources/Visuals/SettingsLogo.png", 86, 221, 66, 66, "", True, True, True, True, "", "CornerLeft"]
-HelpButtonInfo = ["Resources/Visuals/HelpLogo.png", 156, 221, 66, 66, "", True, True, True, True, "", "CornerLeft"]
+SettingsButtonInfo = ["Resources/Visuals/SettingsLogo.png", 86, 221, 66, 66, "Toggle SETTINGSENABLE", True, True, True, True, "", "CornerLeft"]
+HelpButtonInfo = ["Resources/Visuals/HelpLogo.png", 156, 221, 66, 66, "Toggle HELPENABLE", True, True, True, True, "", "CornerLeft"]
 
 #All Market Buy Sell Buttons
 StSellInf = ["Resources/Visuals/Sell.png", -507, 170, 118, 29, "Sell Stone", True, True, True, True, "", "Center"] 
@@ -237,6 +237,8 @@ OFFSET = 0.8 #Left Right planet offeset when focused
 ZLOCATION = [0,0]
 FOCUSACTIVE = True
 MARKETENABLE = False
+SETTINGSENABLE = False
+HELPENABLE = False
 MARKETMULT = 1
 #Gamestate allows for porper components to be on screen, 0 for no focus, 1 for focusing, 2 for focused, 3 for defocusing
 GAMESTATE = 0
@@ -266,6 +268,10 @@ def TaskHandler(Action):
     global RAREMINERAL
     global ID
     global Miners
+
+    global MARKETENABLE
+    global SETTINGSENABLE
+    global HELPENABLE
 
     if "Buy" in Action:
         if "Stone" in Action:
@@ -371,46 +377,54 @@ def TaskHandler(Action):
         ToggleMe = Action.replace("Toggle ", "")
         Settings()
         if (globals()[ToggleMe]):
+            MARKETENABLE = False
+            SETTINGSENABLE = False
+            HELPENABLE = False
             globals()[ToggleMe] = False
         else: 
+            MARKETENABLE = False
+            SETTINGSENABLE = False
+            HELPENABLE = False
             globals()[ToggleMe] = True
-        if ToggleMe == "MARKETENABLE":
-            if MARKETENABLE:
-                ClickableEntities.add(StSellBt)
-                ClickableEntities.add(StBuyBt)
-                ClickableEntities.add(CoSellBt)
-                ClickableEntities.add(CoBuyBt)
-                ClickableEntities.add(IrSellBt)
-                ClickableEntities.add(IrBuyBt)
-                ClickableEntities.add(SiSellBt)
-                ClickableEntities.add(SiBuyBt)
-                ClickableEntities.add(QuSellBt)
-                ClickableEntities.add(QuBuyBt)
-                ClickableEntities.add(GoSellBt)
-                ClickableEntities.add(GoBuyBt)
-                ClickableEntities.add(RMSellBt)
-                ClickableEntities.add(RMBuyBt)
-                ClickableEntities.add(MarketGUI)
-                ClickableEntities.add(IncrementBuyBt)
-                ClickableEntities.add(DecrementBuyBt)
-            else:
-                ClickableEntities.remove(StSellBt)
-                ClickableEntities.remove(StBuyBt)
-                ClickableEntities.remove(CoSellBt)
-                ClickableEntities.remove(CoBuyBt)
-                ClickableEntities.remove(IrSellBt)
-                ClickableEntities.remove(IrBuyBt)
-                ClickableEntities.remove(SiSellBt)
-                ClickableEntities.remove(SiBuyBt)
-                ClickableEntities.remove(QuSellBt)
-                ClickableEntities.remove(QuBuyBt)
-                ClickableEntities.remove(GoSellBt)
-                ClickableEntities.remove(GoBuyBt)
-                ClickableEntities.remove(RMSellBt)
-                ClickableEntities.remove(RMBuyBt)
-                ClickableEntities.remove(MarketGUI)
-                ClickableEntities.remove(IncrementBuyBt)
-                ClickableEntities.remove(DecrementBuyBt)
+
+        if MARKETENABLE:
+            ClickableEntities.add(StSellBt)
+            ClickableEntities.add(StBuyBt)
+            ClickableEntities.add(CoSellBt)
+            ClickableEntities.add(CoBuyBt)
+            ClickableEntities.add(IrSellBt)
+            ClickableEntities.add(IrBuyBt)
+            ClickableEntities.add(SiSellBt)
+            ClickableEntities.add(SiBuyBt)
+            ClickableEntities.add(QuSellBt)
+            ClickableEntities.add(QuBuyBt)
+            ClickableEntities.add(GoSellBt)
+            ClickableEntities.add(GoBuyBt)
+            ClickableEntities.add(RMSellBt)
+            ClickableEntities.add(RMBuyBt)
+            ClickableEntities.add(MarketGUI)
+            ClickableEntities.add(IncrementBuyBt)
+            ClickableEntities.add(DecrementBuyBt)
+        else:
+            ClickableEntities.remove(StSellBt)
+            ClickableEntities.remove(StBuyBt)
+            ClickableEntities.remove(CoSellBt)
+            ClickableEntities.remove(CoBuyBt)
+            ClickableEntities.remove(IrSellBt)
+            ClickableEntities.remove(IrBuyBt)
+            ClickableEntities.remove(SiSellBt)
+            ClickableEntities.remove(SiBuyBt)
+            ClickableEntities.remove(QuSellBt)
+            ClickableEntities.remove(QuBuyBt)
+            ClickableEntities.remove(GoSellBt)
+            ClickableEntities.remove(GoBuyBt)
+            ClickableEntities.remove(RMSellBt)
+            ClickableEntities.remove(RMBuyBt)
+            ClickableEntities.remove(MarketGUI)
+            ClickableEntities.remove(IncrementBuyBt)
+            ClickableEntities.remove(DecrementBuyBt)
+        
+        
     elif "New" in Action:
         MinerID = ""
         if "Dithea" in Action:
@@ -482,6 +496,12 @@ def MarketDrawer():
         rectL = surfL.get_rect()
         rectL.center = (int((WIDTH/2)+(DefaultLocationBuy[i][0]*SFACTOR)),int((HEIGHT/2)+((DefaultLocationBuy[i][1]+30)*SFACTOR)))
         displaysurface.blit(surfL, rectL)
+
+def SettingsDrawer():
+    pass
+
+def HelpDrawer():
+    pass
 
 def PriceChecker(ID):
     global MONEY
@@ -743,7 +763,7 @@ class ButtonObject(pygame.sprite.Sprite):
         self.info = Info
         self.surf = pygame.image.load(Info[0]).convert_alpha()
         self.rect = self.surf.get_rect()
-        self.rect.topleft = (int(Info[1]*SFACTOR),int(Info[2]*SFACTOR))
+        self.rect.topleft = (-2000),int(-2000)
     def Update(self):
         if self.info[11] == "CornerLeft":
             self.surf = pygame.image.load(self.info[0]).convert_alpha()
@@ -842,6 +862,41 @@ class MinerSellButtons(pygame.sprite.Sprite):
     def Clicked(self):
         TaskHandler(self.info[5])
                 
+class Settings(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.surf = pygame.image.load("Resources/Visuals/Settings.png").convert_alpha()
+        self.rect = self.surf.get_rect()
+        self.rect.center = (int((WIDTH/2)),int((HEIGHT/2)))
+    def Update(self):
+        self.surf = pygame.image.load("Resources/Visuals/Settings.png").convert_alpha()
+        self.surf = pygame.transform.smoothscale(self.surf, (int(1207*SFACTOR),int(640*SFACTOR)))
+        self.rect = self.surf.get_rect()
+        self.rect.center = (int((WIDTH/2)),int((HEIGHT/2)))
+
+    def IsGui(self):
+        return True
+
+    def Clicked(self):
+        pass
+
+class Help(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.surf = pygame.image.load("Resources/Visuals/Help.png").convert_alpha()
+        self.rect = self.surf.get_rect()
+        self.rect.center = (int((WIDTH/2)),int((HEIGHT/2)))
+    def Update(self):
+        self.surf = pygame.image.load("Resources/Visuals/Help.png").convert_alpha()
+        self.surf = pygame.transform.smoothscale(self.surf, (int(1207*SFACTOR),int(640*SFACTOR)))
+        self.rect = self.surf.get_rect()
+        self.rect.center = (int((WIDTH/2)),int((HEIGHT/2)))
+
+    def IsGui(self):
+        return True
+
+    def Clicked(self):
+        pass
 
 #Planets
 #To add a planet create an info vairable, create an object, add that object to planet_list
@@ -875,7 +930,7 @@ render_me.add(SettingsButton)
 render_me.add(HelpButton)
 #render_me.add(MoneyDrawer)
 
-#All markett objects, allows easier render
+#All market objects, allows easier render
 MarketGUI = Market()
 StSellBt = ButtonObject(StSellInf)
 StBuyBt = ButtonObject(StBuyInf)
@@ -912,6 +967,16 @@ market_render.add(RMSellBt)
 market_render.add(RMBuyBt)
 market_render.add(IncrementBuyBt)
 market_render.add(DecrementBuyBt)
+
+#All settings Objects
+SettingsGUI = Settings()
+settings_render = pygame.sprite.Group()
+settings_render.add(SettingsGUI)
+
+#All help Objects
+HelpGUI = Help()
+help_render = pygame.sprite.Group()
+help_render.add(HelpGUI)
 
 #All Miners
 DLBtn = ButtonObject(DLBtnInf)
@@ -1001,6 +1066,10 @@ while True:
             if event.key == K_ESCAPE:
                 if MARKETENABLE:
                     TaskHandler("Toggle MARKETENABLE")
+                elif SETTINGSENABLE:
+                    TaskHandler("Toggle SETTINGSENABLE")
+                elif HELPENABLE:
+                    TaskHandler("Toggle HELPENABLE")
                 elif FOCUSACTIVE:
                     TARGET.FocusSet(False)
                     FOCUSACTIVE = False
@@ -1095,11 +1164,23 @@ while True:
         displaysurface.blit(entity.surf, entity.rect)
         entity.Update()
 
-    if MARKETENABLE:
+    if MARKETENABLE and not SETTINGSENABLE and not HELPENABLE:
         for entity in market_render:
             displaysurface.blit(entity.surf, entity.rect)
             entity.Update()
         MarketDrawer()
+
+    if SETTINGSENABLE and not MARKETENABLE and not HELPENABLE:
+        for entity in settings_render:
+            displaysurface.blit(entity.surf, entity.rect)
+            entity.Update()
+        SettingsDrawer()
+
+    if HELPENABLE and not SETTINGSENABLE and not MARKETENABLE:
+        for entity in help_render:
+            displaysurface.blit(entity.surf, entity.rect)
+            entity.Update()
+        HelpDrawer()
 
     for mObject in Miners:
         mObject.Mine()
