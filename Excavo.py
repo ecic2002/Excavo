@@ -27,7 +27,7 @@ except:
     sys.exit()
 
 #How to restart the game
-RESET = False
+RESET = True
 
 if RESET:
     MONEY = 200
@@ -42,7 +42,7 @@ if RESET:
     Miners = []
     MinerDictionary = {
     "DL" : [[100,50,20,0,0,0,0,0], [0.5, 0.1, 0.01, 0, 0, 0, 0], 30, 0],
-    "DM" : [[250,60,40,0,0,0,0,0], [0.6, 0.2, 0.03, 0.05, 0, 0, 0], 15, 0],
+    "DM" : [[250,60,40,0,0,0,0,0], [0.6, 0.2, 0.03, 0.02, 0, 0, 0], 15, 0],
     "DH" : [[500,100,60,0,5,0,0,0], [0.7, 0.2, 0.1, 0.03, 0.02, 0, 0], 40, 0],
 
     "EL" : [[1000,300,0,0,0,0,0,0], [0.2, 0.4, 0.1, 0, 0, 0, 0], 60, 0],
@@ -140,7 +140,6 @@ def SaveNQuit(Save):
         pygame.quit()
         sys.exit()
 
-
 #Planets
 # #Key;MiniPlanets = ["Directory of Image", Width, Height, Orbit Radius, Speed, Trail Color, Trail Lenght, FocusMode, Name]
 #For trail lenght, 2 is about half, less is longer, higher is shorter, Make sure direction and length match!
@@ -162,7 +161,7 @@ MoneyInfo = ["Money: ","MONEY", 30, 0.01, 0.01, (255,255,255), True, True, True,
 #Buttons
 #Key; [Image link, Default x, Defaul y, Width, Height, Action, Enable0, Enable1, Enable2, Enable3, Planet]
 MarketButtonInfo = ["Resources/Visuals/MarketLogo.png", 16, 221, 66, 66, "Toggle MARKETENABLE", True, True, True, True, "", "CornerLeft"]
-SettingsButtonInfo = ["Resources/Visuals/SettingsLogo.png", 86, 221, 66, 66, "New Dithea T1", True, True, True, True, "", "CornerLeft"]
+SettingsButtonInfo = ["Resources/Visuals/SettingsLogo.png", 86, 221, 66, 66, "", True, True, True, True, "", "CornerLeft"]
 HelpButtonInfo = ["Resources/Visuals/HelpLogo.png", 156, 221, 66, 66, "", True, True, True, True, "", "CornerLeft"]
 
 #All Market Buy Sell Buttons
@@ -180,6 +179,9 @@ GoSellInf = ["Resources/Visuals/Sell.png", 338, 170, 118, 29, "Sell Gold", True,
 GoBuyInf = ["Resources/Visuals/Buy.png", 338, 270, 118, 29, "Buy Gold", True, True, True, True, "", "Center"]
 RMSellInf = ["Resources/Visuals/Sell.png", 507, 170, 118, 29, "Sell RareMineral", True, True, True, True, "", "Center"] 
 RMBuyInf = ["Resources/Visuals/Buy.png", 507, 270, 118, 29, "Buy RareMineral", True, True, True, True, "", "Center"]
+
+IncrementBuyInf = ["Resources/Visuals/RArrow.png", -400, -100, 18, 30, "Increment MARKETMULT", True, True, True, True, "", "Center"]
+DecrementBuyInf = ["Resources/Visuals/LArrow.png", -500, -100, 18, 30, "Decrement MARKETMULT", True, True, True, True, "", "Center"]
 
 #All Miner Buy Buttons
 DLBtnInf = ["Resources/Visuals/BuyMiner.png", 426, -199, 59, 29, "New Dithea T1", True, True, True, True, "Dithea", "Miner"]
@@ -199,8 +201,8 @@ RHBtnInf = ["Resources/Visuals/BuyMiner.png", 426, 47, 59, 29, "New Runoth T3", 
 SellPrices = [10, 15, 50, 110, 160, 430, 2800]
 BuyPrices = [25, 35, 90, 280, 340, 880, 6300]
 
-DefaultLocationSell = [[-507, 130],[-338, 130],[-170, 130],[0, 120],[170, 130],[338, 130],[507, 130]]
-DefaultLocationBuy = [[-507, 230],[-338, 230],[-170, 230],[0, 230],[170, 230],[338, 230],[507, 230]]
+DefaultLocationSell = [[-507, 110],[-338, 110],[-170, 110],[0, 110],[170, 110],[338, 110],[507, 110]]
+DefaultLocationBuy = [[-507, 210],[-338, 210],[-170, 210],[0, 210],[170, 210],[338, 210],[507, 210]]
 
 #Replace Defaults with save file
     #Save File Codes
@@ -215,6 +217,7 @@ OFFSET = 0.8 #Left Right planet offeset when focused
 ZLOCATION = [0,0]
 FOCUSACTIVE = True
 MARKETENABLE = False
+MARKETMULT = 1
 #Gamestate allows for porper components to be on screen, 0 for no focus, 1 for focusing, 2 for focused, 3 for defocusing
 GAMESTATE = 0
 EASE = 1 #Creates Smoother Trasitions
@@ -246,62 +249,62 @@ def TaskHandler(Action):
 
     if "Buy" in Action:
         if "Stone" in Action:
-            if MONEY >= BuyPrices[0]:
-                MONEY -= BuyPrices[0]
-                STONE +=1
+            if MONEY >= BuyPrices[0] * MARKETMULT:
+                MONEY -= BuyPrices[0] * MARKETMULT
+                STONE +=1 * MARKETMULT
         if "Coal" in Action:
-            if MONEY >= BuyPrices[1]:
-                MONEY -= BuyPrices[1]
-                COAL +=1
+            if MONEY >= BuyPrices[1] * MARKETMULT:
+                MONEY -= BuyPrices[1] * MARKETMULT
+                COAL +=1 * MARKETMULT
         if "Iron" in Action:
-            if MONEY >= BuyPrices[2]:
-                MONEY -= BuyPrices[2]
-                IRON +=1
+            if MONEY >= BuyPrices[2] * MARKETMULT:
+                MONEY -= BuyPrices[2] * MARKETMULT
+                IRON +=1 * MARKETMULT
         if "Silicon" in Action:
-            if MONEY >= BuyPrices[3]:
-                MONEY -= BuyPrices[3]
-                SILICON +=1
+            if MONEY >= BuyPrices[3] * MARKETMULT:
+                MONEY -= BuyPrices[3] * MARKETMULT
+                SILICON +=1 * MARKETMULT
         if "Quartz" in Action:
-            if MONEY >= BuyPrices[4]:
-                MONEY -= BuyPrices[4]
-                QUARTZ +=1
+            if MONEY >= BuyPrices[4] * MARKETMULT:
+                MONEY -= BuyPrices[4] * MARKETMULT
+                QUARTZ +=1 * MARKETMULT
         if "Gold" in Action:
-            if MONEY >= BuyPrices[5]:
-                MONEY -= BuyPrices[5]
-                GOLD +=1
+            if MONEY >= BuyPrices[5] * MARKETMULT:
+                MONEY -= BuyPrices[5] * MARKETMULT
+                GOLD +=1 * MARKETMULT
         if "RareMineral" in Action:
-            if MONEY >= BuyPrices[6]:
-                MONEY -= BuyPrices[6]
-                RAREMINERAL +=1
+            if MONEY >= BuyPrices[6] * MARKETMULT:
+                MONEY -= BuyPrices[6] * MARKETMULT
+                RAREMINERAL +=1 * MARKETMULT
     elif "Sell" in Action:
         if "Stone" in Action:
-            if STONE >= 1:
-                MONEY += SellPrices[0]
-                STONE -=1
+            if STONE >= 1 * MARKETMULT:
+                MONEY += SellPrices[0] * MARKETMULT
+                STONE -=1 * MARKETMULT
         if "Coal" in Action:
-            if COAL >= 1:
-                MONEY += SellPrices[1]
-                COAL -=1
+            if COAL >= 1 * MARKETMULT:
+                MONEY += SellPrices[1] * MARKETMULT
+                COAL -=1 * MARKETMULT
         if "Iron" in Action:
-            if IRON >= 1:
-                MONEY += SellPrices[2]
-                IRON -=1
+            if IRON >= 1 * MARKETMULT:
+                MONEY += SellPrices[2] * MARKETMULT
+                IRON -=1 * MARKETMULT
         if "Silicon" in Action:
-            if SILICON >= 1:
-                MONEY += SellPrices[3]
-                SILICON -=1
+            if SILICON >= 1 * MARKETMULT:
+                MONEY += SellPrices[3] * MARKETMULT
+                SILICON -=1 * MARKETMULT
         if "Quartz" in Action:
-            if QUARTZ >= 1:
-                MONEY += SellPrices[4]
-                QUARTZ -=1
+            if QUARTZ >= 1 * MARKETMULT:
+                MONEY += SellPrices[4] * MARKETMULT
+                QUARTZ -=1 * MARKETMULT
         if "Gold" in Action:
-            if GOLD >= 1:
-                MONEY += SellPrices[5]
-                GOLD -=1
+            if GOLD >= 1 * MARKETMULT:
+                MONEY += SellPrices[5] * MARKETMULT
+                GOLD -=1 * MARKETMULT
         if "RareMineral" in Action:
-            if RAREMINERAL >= 1:
-                MONEY += SellPrices[6]
-                RAREMINERAL -=1
+            if RAREMINERAL >= 1 * MARKETMULT:
+                MONEY += SellPrices[6] * MARKETMULT
+                RAREMINERAL -=1 * MARKETMULT
     elif "Toggle" in Action:
         ToggleMe = Action.replace("Toggle ", "")
         if (globals()[ToggleMe]):
@@ -324,6 +327,9 @@ def TaskHandler(Action):
                 ClickableEntities.add(GoBuyBt)
                 ClickableEntities.add(RMSellBt)
                 ClickableEntities.add(RMBuyBt)
+                ClickableEntities.add(MarketGUI)
+                ClickableEntities.add(IncrementBuyBt)
+                ClickableEntities.add(DecrementBuyBt)
             else:
                 ClickableEntities.remove(StSellBt)
                 ClickableEntities.remove(StBuyBt)
@@ -339,6 +345,9 @@ def TaskHandler(Action):
                 ClickableEntities.remove(GoBuyBt)
                 ClickableEntities.remove(RMSellBt)
                 ClickableEntities.remove(RMBuyBt)
+                ClickableEntities.remove(MarketGUI)
+                ClickableEntities.remove(IncrementBuyBt)
+                ClickableEntities.remove(DecrementBuyBt)
     elif "New" in Action:
         MinerID = ""
         if "Dithea" in Action:
@@ -367,18 +376,44 @@ def TaskHandler(Action):
         else:
             print ("Purchase Error")
 
+    elif "Increment" in Action:
+        EditMe = Action.replace("Increment ", "")
+        if (globals()[EditMe]<100):
+            globals()[EditMe] += 1
+    elif "Decrement" in Action:
+        EditMe = Action.replace("Decrement ", "")
+        if (globals()[EditMe]>1):
+            globals()[EditMe] -= 1
+
 def MarketDrawer():
-    FontData3 = pygame.font.Font('PressStart2P-Regular.ttf', int(21*SFACTOR))
+    FontDataS = pygame.font.Font('PressStart2P-Regular.ttf', int(13*SFACTOR))
+    FontDataL = pygame.font.Font('PressStart2P-Regular.ttf', int(22*SFACTOR))
+
+    surfN = FontDataL.render(str(MARKETMULT), True, (255,255,255))
+    rectN = surfN.get_rect()
+    rectN.center = (int((WIDTH/2)+(-450*SFACTOR)),int((HEIGHT/2)+(-100*SFACTOR)))
+    displaysurface.blit(surfN, rectN)
+
     for i in range(7):
-        surf = FontData3.render(str(SellPrices[i]), True, (255,255,255))
-        rect = surf.get_rect()
-        rect.center = (int((WIDTH/2)+(DefaultLocationSell[i][0]*SFACTOR)),int((HEIGHT/2)+(DefaultLocationSell[i][1]*SFACTOR)))
-        displaysurface.blit(surf, rect)
+        surfT = FontDataS.render("Sell " + str(MARKETMULT) + " for", True, (255,255,255))
+        rectT = surfT.get_rect()
+        rectT.center = (int((WIDTH/2)+(DefaultLocationSell[i][0]*SFACTOR)),int((HEIGHT/2)+(DefaultLocationSell[i][1]*SFACTOR)))
+        displaysurface.blit(surfT, rectT)
+
+        surfL = FontDataL.render("$"+str(SellPrices[i]*MARKETMULT), True, (255,255,255))
+        rectL = surfL.get_rect()
+        rectL.center = (int((WIDTH/2)+(DefaultLocationSell[i][0]*SFACTOR)),int((HEIGHT/2)+((DefaultLocationSell[i][1]+30)*SFACTOR)))
+        displaysurface.blit(surfL, rectL)
     for i in range(7):
-        surf = FontData3.render(str(BuyPrices[i]), True, (255,255,255))
-        rect = surf.get_rect()
-        rect.center = (int((WIDTH/2)+(DefaultLocationBuy[i][0]*SFACTOR)),int((HEIGHT/2)+(DefaultLocationBuy[i][1]*SFACTOR)))
-        displaysurface.blit(surf, rect)
+        surfT = FontDataS.render("Buy " + str(MARKETMULT) + " for", True, (255,255,255))
+        rectT = surfT.get_rect()
+        rectT.center = (int((WIDTH/2)+(DefaultLocationBuy[i][0]*SFACTOR)),int((HEIGHT/2)+(DefaultLocationBuy[i][1]*SFACTOR)))
+        displaysurface.blit(surfT, rectT)
+
+        surfL = FontDataL.render("$"+str(BuyPrices[i]*MARKETMULT), True, (255,255,255))
+        rectL = surfL.get_rect()
+        rectL.center = (int((WIDTH/2)+(DefaultLocationBuy[i][0]*SFACTOR)),int((HEIGHT/2)+((DefaultLocationBuy[i][1]+30)*SFACTOR)))
+        displaysurface.blit(surfL, rectL)
 
 def PriceChecker(ID):
     global MONEY
@@ -404,6 +439,13 @@ def PriceChecker(ID):
     else:
         return False
 
+def Success():
+    #Play + sound
+    print("Action Success")
+
+def Fail():
+    #Play fail sound
+    print("Action Fail")
 
 #Object classes
 class MiniPlanet(pygame.sprite.Sprite):
@@ -670,6 +712,7 @@ class Market(pygame.sprite.Sprite):
 
     def IsGui(self):
         return True
+
     def Clicked(self):
         print("I was clicked")
 
@@ -776,7 +819,9 @@ QuBuyBt = ButtonObject(QuBuyInf)
 GoSellBt = ButtonObject(GoSellInf)
 GoBuyBt = ButtonObject(GoBuyInf) 
 RMSellBt = ButtonObject(RMSellInf)
-RMBuyBt = ButtonObject(RMBuyInf) 
+RMBuyBt = ButtonObject(RMBuyInf)
+IncrementBuyBt = ButtonObject(IncrementBuyInf)
+DecrementBuyBt = ButtonObject(DecrementBuyInf)
 
 market_render = pygame.sprite.Group()
 market_render.add(MarketGUI)
@@ -794,6 +839,8 @@ market_render.add(GoSellBt)
 market_render.add(GoBuyBt)
 market_render.add(RMSellBt)
 market_render.add(RMBuyBt)
+market_render.add(IncrementBuyBt)
+market_render.add(DecrementBuyBt)
 
 #All Miners
 DLBtn = ButtonObject(DLBtnInf)
@@ -853,6 +900,7 @@ ClickableEntities.add(RLBtn)
 ClickableEntities.add(RMBtn)
 ClickableEntities.add(RHBtn)
 
+
 MineralDrawer = MineralDraw()
 #Main Game loop
 while True:
@@ -880,7 +928,15 @@ while True:
         if event.type == KEYDOWN:
             #Close game using ESC key
             if event.key == K_ESCAPE:
-                SaveNQuit(True)
+                if MARKETENABLE:
+                    TaskHandler("Toggle MARKETENABLE")
+                elif FOCUSACTIVE:
+                    TARGET.FocusSet(False)
+                    FOCUSACTIVE = False
+                    EASE = 0
+                    GAMESTATE = 3
+                else:
+                    SaveNQuit(True)  
             #Go into full screen using f key
             if event.key == K_f:
                 FULLSCREEN = not FULLSCREEN
@@ -919,20 +975,20 @@ while True:
                         elif not WASGUI:
                             TARGET = entity
                     #If clicked on self
-                        if not WASGUI:
-                            if (TARGET.info[7]):
-                                TARGET.FocusSet(False)
-                                FOCUSACTIVE = False
-                                EASE = 0
-                                GAMESTATE = 3
-                            #If clicked on another planet
-                            else:
-                                for entity in planet_list:
-                                    entity.FocusSet(False)
-                                TARGET.FocusSet(True)
-                                EASE = 0
-                                FOCUSACTIVE = True
-                                GAMESTATE = 1                            
+                    if not WASGUI:
+                        if (TARGET.info[7]):
+                            TARGET.FocusSet(False)
+                            FOCUSACTIVE = False
+                            EASE = 0
+                            GAMESTATE = 3
+                        #If clicked on another planet
+                        else:
+                            for entity in planet_list:
+                                entity.FocusSet(False)
+                            TARGET.FocusSet(True)
+                            EASE = 0
+                            FOCUSACTIVE = True
+                            GAMESTATE = 1                            
                 #EmptySpace was clicked
                 else:
                     if FOCUSACTIVE and not WASGUI:
@@ -1019,18 +1075,3 @@ while True:
     #Poor zooming performance
     #Zooming with scroll wheel is not super smooth
     #Trails technically off center
-
-    #Plan
-    #Setup a techtree system
-    #Have different miners -  Unlocked using tech tree, increaasing with what minerals can mine
-    #Buy/Sell System?
-    #Mineral Machines cost minerals to get,
-    #Can sell minerals for Money, variable mineral market, Randomizer and game clock?
-    #
-
-    #Planning For Save
-    #Money
-    #Mineral Counts
-    #Miners
-    #ID
-    #Market Data
