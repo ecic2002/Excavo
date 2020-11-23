@@ -92,4 +92,9 @@ Getting the proper data based off string names, I know, Ita a janky way of doing
 The miner are all objects created during runtime, this is how I got that to work.  
 
 *The feature I attempted to create ended up being removed, and I did not end up using those resources. I did, however, decide to keep them in the resource document
+
+
+Image Resources:
+https://unsplash.com/photos/-heLWtuAN3c
+
 > Written with [StackEdit](https://stackedit.io/).

@@ -61,7 +61,11 @@ MinerDictionary = {
     "RH" : [[0,0,0,0,0,0,0,0], [0.7, 0.2, 0.1, 0, 0, 0, 0], 30],
 }
 
+#How to offset costs and everything
+DataLocations = []
+
 #PlanetDescriptor
+#DEPRECIATED
 #Key;MiniPlanets = [Who It is Describing, Link to Description, BKG Color, BKG Opacity, Text Color, Active]
 SunData = ["Sun","Resources/Info/Sun.txt", (137,137,137), 156, (255,255,255), True]
 
@@ -418,9 +422,8 @@ class Descriptor(pygame.sprite.Sprite):
             self.rect.midright = (int(WIDTH), int(HEIGHT/2))
 
 class TextDrawer(pygame.sprite.Sprite):
-    def __init__(self, Info):
+    def __init__(self):
         super().__init__()
-        self.info = Info
         self.surf = font1.render('Hello! Test', True, (255,255,255))
         self.rect = self.surf.get_rect()
         self.rect.center = (int(WIDTH*(3/4)), int(HEIGHT/2))
@@ -433,6 +436,14 @@ class TextDrawer(pygame.sprite.Sprite):
             self.surf = font1.render(TARGET.info[8], True, (255,255,255))
             self.rect = self.surf.get_rect()
             self.rect.center = (int(WIDTH*(3/4)), int(HEIGHT*0.2))
+            if (TARGET.info[8] == "Dithea"):
+                DitheaButtons.Update()
+            elif (TARGET.info[8] == "Eurus"):
+                EurusButtons.Update()
+            elif (TARGET.info[8] == "Crystine"):
+                CrystineButtons.Update()
+            elif (TARGET.info[8] == "Runoth"):
+                RunothButtons.Update()
 
 class DataDrawer(pygame.sprite.Sprite):
     def __init__(self, Info):
@@ -517,7 +528,7 @@ class MineralDraw(pygame.sprite.Sprite):
         displaysurface.blit(self.surfQuartz, (int(50*SFACTOR),int(146*SFACTOR)))
         displaysurface.blit(self.surfGold, (int(50*SFACTOR),int(171*SFACTOR)))
         displaysurface.blit(self.surfRareMineral, (int(50*SFACTOR),int(196*SFACTOR)))
-       
+
 class ButtonObject(pygame.sprite.Sprite):
     def __init__(self, Info):
         super().__init__()
@@ -559,23 +570,42 @@ class Market(pygame.sprite.Sprite):
         print("I was clicked")
 
 class MinerSellButtons(pygame.sprite.Sprite):
-    def __init__(self, Info):
+    def __init__(self, PlanetID):
         super().__init__()
-        self.info = Info
-        self.surf = pygame.image.load(Info[0]).convert_alpha()
-        self.rect = self.surf.get_rect()
-        self.rect.topleft = (int(Info[1]*SFACTOR),int(Info[2]*SFACTOR))
+        self.id = PlanetID
+        #self.surf = pygame.image.load(Info[0]).convert_alpha()
+        #self.rect = self.surf.get_rect()
+        #self.rect.topleft = (int(Info[1]*SFACTOR),int(Info[2]*SFACTOR))
+        self.Imgsurf = pygame.image.load("Resources/Visuals/" + self.id + "Menu.png").convert_alpha()
     def Update(self):
-        if self.info[11] == "CornerLeft":
-            self.surf = pygame.image.load(self.info[0]).convert_alpha()
-            self.surf = pygame.transform.smoothscale(self.surf, (int(self.info[3]*SFACTOR),int(self.info[4]*SFACTOR)))
-            self.rect = self.surf.get_rect()
-            self.rect.topleft = (int(self.info[1]*SFACTOR),int(self.info[2]*SFACTOR))
-        elif self.info[11] == "Center":
-            self.surf = pygame.image.load(self.info[0]).convert_alpha()
-            self.surf = pygame.transform.smoothscale(self.surf, (int(self.info[3]*SFACTOR),int(self.info[4]*SFACTOR)))
-            self.rect = self.surf.get_rect()
-            self.rect.center = (int((WIDTH/2)+(self.info[1]*SFACTOR)),int((HEIGHT/2)+(self.info[2]*SFACTOR)))
+        if (True):
+            global MinerDictionary
+            OffsetsPurchase = [-50, 16, 79, 139, 196, 262, 330, 396]
+            OffsetsYield = [16, 79, 139, 196, 262, 330, 396]
+            OffsetSeperate = [-199, -76, 47]
+            Classes = ["L","M","H"]
+            fontMenu = pygame.font.Font('PressStart2P-Regular.ttf', int(14*SFACTOR) )
+            Imgsurf = self.Imgsurf
+            Imgsurf = pygame.image.load("Resources/Visuals/" + self.id + "Menu.png").convert_alpha()
+            Imgsurf = pygame.transform.smoothscale(Imgsurf, (int(1920*SFACTOR),int(1080*SFACTOR)))
+            Imgrect = Imgsurf.get_rect()
+            Imgrect.center = (int((WIDTH/2)),int((HEIGHT/2)))
+            displaysurface.blit(Imgsurf, Imgrect)
+
+            for v in range(len(OffsetSeperate)):
+                CurrentData = MinerDictionary[(self.id+Classes[v])]
+                for p in range(len(OffsetsPurchase)):
+                    surf = fontMenu.render(str(CurrentData[0][p]), True, (255,255,255))
+                    rect = surf.get_rect()
+                    rect.center = (int(WIDTH*(3/4)+(OffsetsPurchase[p]*SFACTOR)), int((HEIGHT*0.5)+((-27+OffsetSeperate[v])*SFACTOR)))
+                    displaysurface.blit(surf, rect)
+                for y in range(len(OffsetsYield)):
+                    surf = fontMenu.render(str(int(CurrentData[1][y]*100))+"%", True, (255,255,255))
+                    rect = surf.get_rect()
+                    rect.center = (int(WIDTH*(3/4)+(OffsetsYield[y]*SFACTOR)), int((HEIGHT*0.5)+(OffsetSeperate[v]*SFACTOR)))
+                    displaysurface.blit(surf, rect)
+
+
     def IsGui(self):
         return True
     def Clicked(self):
@@ -620,9 +650,6 @@ class Miner(pygame.sprite.Sprite):
             if random.random() < self.yields[6]:
                 RAREMINERAL += 1
                 
-                
-        
-
 
 #Planets
 #To add a planet create an info vairable, create an object, add that object to planet_list
@@ -642,7 +669,7 @@ planet_list.add(RunothPlanet)
 
 #Renderer for all non planets
 SunDescriptor = Descriptor(SunData)
-SunTextDrawer = TextDrawer(SunData)
+SunTextDrawer = TextDrawer()
 MoneyDrawer = DataDrawer(MoneyInfo)
 MarketButton = ButtonObject(MarketButtonInfo)
 SettingsButton = ButtonObject(SettingsButtonInfo)
@@ -690,6 +717,11 @@ market_render.add(GoBuyBt)
 market_render.add(RMSellBt)
 market_render.add(RMBuyBt)
 
+#Miner Purchase Buttons and Such
+DitheaButtons = MinerSellButtons("D")
+EurusButtons = MinerSellButtons("E")
+CrystineButtons = MinerSellButtons("C")
+RunothButtons = MinerSellButtons("R")
 
 #All Objects that can be clciked on
 #GUI OBJECTS MUST COME BEFORE NON GUI OBJECTS (Planets)
@@ -875,3 +907,10 @@ while True:
     #Mineral Machines cost minerals to get,
     #Can sell minerals for Money, variable mineral market, Randomizer and game clock?
     #
+
+    #Planning For Save
+    #Money
+    #Mineral Counts
+    #Miners
+    #ID
+    #Market Data
