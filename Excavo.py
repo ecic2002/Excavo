@@ -161,7 +161,7 @@ def SaveNQuit(Save):
         sys.exit()
 
 #Planets
-# #Key;MiniPlanets = ["Directory of Image", Width, Height, Orbit Radius, Speed, Trail Color, Trail Lenght, FocusMode, Name]
+#Key;MiniPlanets = ["Directory of Image", Width, Height, Orbit Radius, Speed, Trail Color, Trail Lenght, FocusMode, Name]
 #For trail lenght, 2 is about half, less is longer, higher is shorter, Make sure direction and length match!
 SunInfo = ["Resources/MiniPlanets/Sun.png",200,200,0,0,(0,0,0), 0, False, "Sun"]
 DitheaPlanetInfo = ["Resources/MiniPlanets/DitheaPlanet.png",120,120,550,-0.5,(32,186,102), -3, False, "Dithea"]
@@ -812,6 +812,10 @@ class MinerSellButtons(pygame.sprite.Sprite):
         super().__init__()
         self.id = PlanetID
         self.Imgsurf = pygame.image.load("Resources/Visuals/" + self.id + "Menu.png").convert_alpha()
+        self.MinerL = pygame.image.load("Resources/Visuals/" + self.id + "0Miner.png").convert_alpha()
+        self.MinerM = pygame.image.load("Resources/Visuals/" + self.id + "1Miner.png").convert_alpha()
+        self.MinerH = pygame.image.load("Resources/Visuals/" + self.id + "2Miner.png").convert_alpha()
+        self.Random = random.randint(70,100)
     def Update(self):
         if (True):
             global MinerDictionary
@@ -825,6 +829,8 @@ class MinerSellButtons(pygame.sprite.Sprite):
             Imgrect = Imgsurf.get_rect()
             Imgrect.center = (int((WIDTH/2)),int((HEIGHT/2)))
             displaysurface.blit(Imgsurf, Imgrect)
+
+            RandomID = 1
 
             for v in range(len(OffsetSeperate)):
                 CurrentData = MinerDictionary[(self.id+Classes[v])]
@@ -841,9 +847,6 @@ class MinerSellButtons(pygame.sprite.Sprite):
                 Ownedrect.center = (int(WIDTH*(3/4)+(-200*SFACTOR)), int((HEIGHT*0.5)+((5+OffsetSeperate[v])*SFACTOR)))
                 displaysurface.blit(Ownedsurf, Ownedrect)
 
-                #Buy Button
-
-
                 #Purchase
                 for p in range(len(OffsetsPurchase)):
                     surf = fontMenu.render(str(CurrentData[0][p]), True, (255,255,255))
@@ -857,6 +860,26 @@ class MinerSellButtons(pygame.sprite.Sprite):
                     rect = surf.get_rect()
                     rect.center = (int(WIDTH*(3/4)+(OffsetsYield[y]*SFACTOR)), int((HEIGHT*0.5)+(OffsetSeperate[v]*SFACTOR)))
                     displaysurface.blit(surf, rect)
+                
+                #Miners at the bottom of the screen
+                if v == 0:
+                    MinerSurf = self.MinerL
+                if v == 1:
+                    MinerSurf = self.MinerM
+                if v == 2:
+                    MinerSurf = self.MinerH
+                MinerSurfI = pygame.transform.scale(MinerSurf, (int(64*SFACTOR),int(64*SFACTOR)))
+                MinerRectI = MinerSurfI.get_rect()
+                MinerRectI.center = (int(WIDTH*(3/4)+(-387*SFACTOR)), int((HEIGHT*0.5)+((-27+OffsetSeperate[v])*SFACTOR)))
+                displaysurface.blit(MinerSurfI, MinerRectI)
+
+                for m in range(CurrentData[3]):
+                    MinerSurfS = pygame.transform.scale(MinerSurf, (int(32*SFACTOR),int(32*SFACTOR)))
+                    MinerRectS = MinerSurfS.get_rect()
+                    MinerRectS.center = (int((WIDTH/2)+(SFACTOR*((RandomID*self.Random)%800+100))),int((HEIGHT/2)+(SFACTOR*((RandomID*self.Random)%100+250))))
+                    RandomID += 1
+                    displaysurface.blit(MinerSurfS, MinerRectS)
+
     def IsGui(self):
         return True
     def Clicked(self):
@@ -1217,7 +1240,7 @@ while True:
         HEIGHT = displaysurface.get_height()
 
     #Uncomment for FPS counter
-    #print(str(int(FramePerSec.get_fps())))
+    print(str(int(FramePerSec.get_fps())))
 
     # MONEY = CLOCK*89
     # RAREMINERAL = int(23982893*math.sin(CLOCK/334))
