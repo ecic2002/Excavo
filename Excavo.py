@@ -21,6 +21,9 @@ FULLSCREEN = False
 #Setting to true will ignore Reset File and force game to bbe reset
 RESET = False
 
+#You Can Guess what this does
+CheatMode = True
+
 ResetFile = 'Reset.txt'
 try:
     FlagCheck = open(ResetFile, 'r+')
@@ -513,7 +516,10 @@ def PriceChecker(ID):
     global GOLD
     global RAREMINERAL
 
-    if ((MONEY >= MinerDictionary[ID[0:2]][0][0]) and (STONE >= MinerDictionary[ID[0:2]][0][1]) and (COAL >= MinerDictionary[ID[0:2]][0][2]) and (IRON >= MinerDictionary[ID[0:2]][0][3]) and (SILICON >= MinerDictionary[ID[0:2]][0][4]) and (QUARTZ >= MinerDictionary[ID[0:2]][0][5]) and (GOLD >= MinerDictionary[ID[0:2]][0][6]) and (RAREMINERAL >= MinerDictionary[ID[0:2]][0][7])):
+    if CheatMode:
+        return True
+    
+    elif ((MONEY >= MinerDictionary[ID[0:2]][0][0]) and (STONE >= MinerDictionary[ID[0:2]][0][1]) and (COAL >= MinerDictionary[ID[0:2]][0][2]) and (IRON >= MinerDictionary[ID[0:2]][0][3]) and (SILICON >= MinerDictionary[ID[0:2]][0][4]) and (QUARTZ >= MinerDictionary[ID[0:2]][0][5]) and (GOLD >= MinerDictionary[ID[0:2]][0][6]) and (RAREMINERAL >= MinerDictionary[ID[0:2]][0][7])):
         MONEY -= MinerDictionary[ID[0:2]][0][0]
         STONE -= MinerDictionary[ID[0:2]][0][1]
         COAL -= MinerDictionary[ID[0:2]][0][2]
@@ -815,7 +821,7 @@ class MinerSellButtons(pygame.sprite.Sprite):
         self.MinerL = pygame.image.load("Resources/Visuals/" + self.id + "0Miner.png").convert_alpha()
         self.MinerM = pygame.image.load("Resources/Visuals/" + self.id + "1Miner.png").convert_alpha()
         self.MinerH = pygame.image.load("Resources/Visuals/" + self.id + "2Miner.png").convert_alpha()
-        self.Random = random.randint(70,100)
+        self.Randomizer = []
     def Update(self):
         if (True):
             global MinerDictionary
@@ -830,7 +836,7 @@ class MinerSellButtons(pygame.sprite.Sprite):
             Imgrect.center = (int((WIDTH/2)),int((HEIGHT/2)))
             displaysurface.blit(Imgsurf, Imgrect)
 
-            RandomID = 1
+            RandomID = 0
 
             for v in range(len(OffsetSeperate)):
                 CurrentData = MinerDictionary[(self.id+Classes[v])]
@@ -876,9 +882,13 @@ class MinerSellButtons(pygame.sprite.Sprite):
                 for m in range(CurrentData[3]):
                     MinerSurfS = pygame.transform.scale(MinerSurf, (int(32*SFACTOR),int(32*SFACTOR)))
                     MinerRectS = MinerSurfS.get_rect()
-                    MinerRectS.center = (int((WIDTH/2)+(SFACTOR*((RandomID*self.Random)%800+100))),int((HEIGHT/2)+(SFACTOR*((RandomID*self.Random)%100+250))))
-                    RandomID += 1
-                    displaysurface.blit(MinerSurfS, MinerRectS)
+                    try:
+                        MinerRectS.center = (int((WIDTH/2)+(SFACTOR*((self.Randomizer[RandomID])+60))),int((HEIGHT/2)+(SFACTOR*((self.Randomizer[RandomID+1])+250))))
+                        displaysurface.blit(MinerSurfS, MinerRectS)
+                        RandomID += 2
+                    except:
+                        self.Randomizer.append(random.randint(1,820))
+                        self.Randomizer.append(random.randint(1,100))
 
     def IsGui(self):
         return True
