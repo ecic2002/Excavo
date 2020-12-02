@@ -1,9 +1,17 @@
+# Eric J Sobczak
+# CSCI 101 - Section G
+# Python Create Project - Excavo
+# Refrences: Go to https://ericjs.dev/excavo/ or view SOURCE.md, also it is under setting then credits in the game
+# Time: ~60 hours
+# Github: https://github.com/ecic2002/Excavo
+
 import pygame
 import sys, os
 import math
 from pygame.locals import *
 import random
 import shelve
+import webbrowser
 
  
 pygame.init()
@@ -22,9 +30,9 @@ FULLSCREEN = False
 RESET = False
 
 #You Can Guess what this does
-CheatMode = True
+CheatMode = False
 
-ResetFile = 'Reset.txt'
+ResetFile = 'Reset.txt' 
 try:
     FlagCheck = open(ResetFile, 'r+')
     print("Reading Reset File...")
@@ -79,6 +87,7 @@ if RESET:
     "RM" : [[40000,0,40,300,200,200,50,20], [0.7, 0.05, 0.1, 0.3, 0.2, 0.05, 0.03], 20, 0],
     "RH" : [[80000,20,80,600,400,400,100,30], [1, 1, 0.2, 0.8, 0.7, 0.2, 0.04], 120, 0],
     }
+    VOLUME = 1
 else:
     #Game Data
     MONEY = SaveData['MONEY']
@@ -89,6 +98,7 @@ else:
     QUARTZ = SaveData['QUARTZ']
     GOLD = SaveData['GOLD']
     RAREMINERAL = SaveData['RAREMINERAL']
+    VOLUME = SaveData['VOLUME']
     #Miner Object Lists, must be rebuilt
     ID = 1
     Miners = []
@@ -157,6 +167,7 @@ def SaveNQuit(Save):
         SaveData['GOLD'] = GOLD
         SaveData['RAREMINERAL'] = RAREMINERAL
         SaveData['MinerDictionary'] = MinerDictionary
+        SaveData['VOLUME'] = VOLUME
         SaveData.close()
         FlagCheck.close()
         print("File Saved")
@@ -206,6 +217,12 @@ RMBuyInf = ["Resources/Visuals/Buy.png", 507, 270, 118, 29, "Buy RareMineral", T
 IncrementBuyInf = ["Resources/Visuals/RArrow.png", -400, -100, 18, 30, "Increment MARKETMULT", True, True, True, True, "", "Center"]
 DecrementBuyInf = ["Resources/Visuals/LArrow.png", -500, -100, 18, 30, "Decrement MARKETMULT", True, True, True, True, "", "Center"]
 
+#All settings Button
+VolUpInf = ["Resources/Visuals/RArrow.png", -100, -140, 18, 30, "Volume Up", True, True, True, True, "", "Center"]
+VolDownInf = ["Resources/Visuals/LArrow.png", -500, -140, 18, 30, "Volume Down", True, True, True, True, "", "Center"]
+ResetInf = ["Resources/Visuals/Reset.png", -380, 35, 261, 59, "Reset", True, True, True, True, "", "Center"]
+CreditsInf = ["Resources/Visuals/Credits.png", -380, 225, 255, 53, "Credits", True, True, True, True, "", "Center"]
+
 #All Miner Buy Buttons
 DLBtnInf = ["Resources/Visuals/BuyMiner.png", 426, -199, 59, 29, "New Dithea T1", True, True, True, True, "Dithea", "Miner"]
 DMBtnInf = ["Resources/Visuals/BuyMiner.png", 426, -76, 59, 29, "New Dithea T2", True, True, True, True, "Dithea", "Miner"]
@@ -227,8 +244,20 @@ BuyPrices = [5, 15, 60, 140, 240, 880, 6300]
 DefaultLocationSell = [[-507, 110],[-338, 110],[-170, 110],[0, 110],[170, 110],[338, 110],[507, 110]]
 DefaultLocationBuy = [[-507, 210],[-338, 210],[-170, 210],[0, 210],[170, 210],[338, 210],[507, 210]]
 
-#Replace Defaults with save file
-    #Save File Codes
+#SoundObjects
+SwooshIn  = pygame.mixer.Sound("Resources/Sounds/PassSwoosh.wav")
+ClickSound  = pygame.mixer.Sound("Resources/Sounds/Click.wav")
+SuccessSound = pygame.mixer.Sound("Resources/Sounds/Success.wav")
+FailSound = pygame.mixer.Sound("Resources/Sounds/Fail.wav")
+SwooshOut = pygame.mixer.Sound("Resources/Sounds/LowSwoosh.wav")
+#Audio Settings
+SwooshIn.set_volume(VOLUME)
+SwooshOut.set_volume(VOLUME)
+ClickSound.set_volume(VOLUME)
+SuccessSound.set_volume(VOLUME)
+FailSound.set_volume(VOLUME)
+pygame.mixer.music.set_volume(VOLUME)
+
 
 #Some Initialization code
 FramePerSec = pygame.time.Clock()
@@ -243,6 +272,7 @@ MARKETENABLE = False
 SETTINGSENABLE = False
 HELPENABLE = False
 MARKETMULT = 1
+MUSICPLAYING = False
 #Gamestate allows for porper components to be on screen, 0 for no focus, 1 for focusing, 2 for focused, 3 for defocusing
 GAMESTATE = 0
 EASE = 1 #Creates Smoother Trasitions
@@ -275,6 +305,8 @@ def TaskHandler(Action):
     global MARKETENABLE
     global SETTINGSENABLE
     global HELPENABLE
+
+    global VOLUME
 
     if "Buy" in Action:
         if "Stone" in Action:
@@ -332,6 +364,10 @@ def TaskHandler(Action):
                 MONEY += SellPrices[0] * MARKETMULT
                 STONE -=1 * MARKETMULT
                 Success()
+            elif STONE >=1:
+                MONEY += SellPrices[0] * STONE
+                STONE = 0
+                Fail()
             else:
                 Fail()
         if "Coal" in Action:
@@ -339,6 +375,10 @@ def TaskHandler(Action):
                 MONEY += SellPrices[1] * MARKETMULT
                 COAL -=1 * MARKETMULT
                 Success()
+            elif COAL >=1:
+                MONEY += SellPrices[1] * COAL
+                COAL = 0
+                Fail()
             else:
                 Fail()
         if "Iron" in Action:
@@ -346,6 +386,10 @@ def TaskHandler(Action):
                 MONEY += SellPrices[2] * MARKETMULT
                 IRON -=1 * MARKETMULT
                 Success()
+            elif IRON >=1:
+                MONEY += SellPrices[2] * IRON
+                IRON = 0
+                Fail()
             else:
                 Fail()
         if "Silicon" in Action:
@@ -353,6 +397,10 @@ def TaskHandler(Action):
                 MONEY += SellPrices[3] * MARKETMULT
                 SILICON -=1 * MARKETMULT
                 Success()
+            elif SILICON >=1:
+                MONEY += SellPrices[3] * SILICON
+                SILICON = 0
+                Fail()
             else:
                 Fail()
         if "Quartz" in Action:
@@ -360,6 +408,10 @@ def TaskHandler(Action):
                 MONEY += SellPrices[4] * MARKETMULT
                 QUARTZ -=1 * MARKETMULT
                 Success()
+            elif QUARTZ >=1:
+                MONEY += SellPrices[4] * QUARTZ
+                QUARTZ = 0
+                Fail()
             else:
                 Fail()
         if "Gold" in Action:
@@ -367,6 +419,10 @@ def TaskHandler(Action):
                 MONEY += SellPrices[5] * MARKETMULT
                 GOLD -=1 * MARKETMULT
                 Success()
+            elif GOLD >=1:
+                MONEY += SellPrices[5] * GOLD
+                GOLD = 0
+                Fail()
             else:
                 Fail()
         if "RareMineral" in Action:
@@ -374,11 +430,15 @@ def TaskHandler(Action):
                 MONEY += SellPrices[6] * MARKETMULT
                 RAREMINERAL -=1 * MARKETMULT
                 Success()
+            elif RAREMINERAL >=1:
+                MONEY += SellPrices[6] * RAREMINERAL
+                RAREMINERAL = 0
+                Fail()
             else:
                 Fail()
     elif "Toggle" in Action:
         ToggleMe = Action.replace("Toggle ", "")
-        Settings()
+        Click()
         if (globals()[ToggleMe]):
             MARKETENABLE = False
             SETTINGSENABLE = False
@@ -427,6 +487,24 @@ def TaskHandler(Action):
             ClickableEntities.remove(IncrementBuyBt)
             ClickableEntities.remove(DecrementBuyBt)
         
+        if SETTINGSENABLE:
+            ClickableEntities.add(SettingsGUI)
+            ClickableEntities.add(VolUpBt)
+            ClickableEntities.add(VolDownBt)
+            ClickableEntities.add(ResetBt)
+            ClickableEntities.add(CreditsBt)
+        else:
+            ClickableEntities.remove(SettingsGUI)
+            ClickableEntities.remove(VolUpBt)
+            ClickableEntities.remove(VolDownBt)
+            ClickableEntities.remove(ResetBt)
+            ClickableEntities.remove(CreditsBt)
+
+        if HELPENABLE:
+            ClickableEntities.add(HelpGUI)
+        else:
+            ClickableEntities.remove(HelpGUI)
+
         
     elif "New" in Action:
         MinerID = ""
@@ -457,18 +535,71 @@ def TaskHandler(Action):
 
     elif "Increment" in Action:
         EditMe = Action.replace("Increment ", "")
-        if (globals()[EditMe]<100):
+        if (globals()[EditMe]<25):
             globals()[EditMe] += 1
-            Settings()
+            Click()
+        elif (globals()[EditMe]==25):
+            globals()[EditMe] = 50
+            Click()
+        elif (globals()[EditMe]==50):
+            globals()[EditMe] = 75
+            Click()
+        elif (globals()[EditMe]==75):
+            globals()[EditMe] = 100
+            Click()
+        elif (globals()[EditMe]==100):
+            globals()[EditMe] = 500
+            Click()
+        elif (globals()[EditMe]==500):
+            globals()[EditMe] = 1000
+            Click()
         else:
             Fail()
     elif "Decrement" in Action:
         EditMe = Action.replace("Decrement ", "")
-        if (globals()[EditMe]>1):
+        if (globals()[EditMe]==1000):
+            globals()[EditMe] = 500
+            Click()
+        elif (globals()[EditMe]==500):
+            globals()[EditMe] = 100
+            Click()
+        elif (globals()[EditMe]==100):
+            globals()[EditMe] = 75
+            Click()
+        elif (globals()[EditMe]==75):
+            globals()[EditMe] = 50
+            Click()
+        elif (globals()[EditMe]==50):
+            globals()[EditMe] = 25
+            Click()
+        elif (globals()[EditMe]>1):
             globals()[EditMe] -= 1
-            Settings()
+            Click()
         else:
             Fail()
+
+    elif "Volume" in Action:
+        Task = Action.replace("Volume ", "")
+        if Task == "Up" and VOLUME < 1:
+            VOLUME  = (float(int(VOLUME*10)+1))/10
+            Click()
+        elif Task == "Down" and VOLUME > 0:
+            VOLUME = (float(int(VOLUME*10)-1))/10
+            Click()
+
+    elif "Reset" in Action:
+        FlagCheck = open(ResetFile, 'r+')
+        print("Reset Flag has been changed, game will be reset on next game launch")
+        EntireContents = FlagCheck.read()
+        FlagCheck.seek(0)
+        FlagCheck.write("T")
+        FlagCheck.truncate()
+        Click()
+
+    elif "Credits" in Action:
+        webbrowser.open("https://ericjs.dev/excavo/", new=1)
+        print("Credits on Ericjs.dev have beeen opened")
+        Click()
 
 def MarketDrawer():
     FontDataS = pygame.font.Font('PressStart2P-Regular.ttf', int(13*SFACTOR))
@@ -501,7 +632,25 @@ def MarketDrawer():
         displaysurface.blit(surfL, rectL)
 
 def SettingsDrawer():
-    pass
+    global VOLUME
+    SwooshIn.set_volume(VOLUME)
+    SwooshOut.set_volume(VOLUME)
+    pygame.mixer.music.set_volume(VOLUME)
+    ClickSound.set_volume(VOLUME)
+    SuccessSound.set_volume(VOLUME)
+    FailSound.set_volume(VOLUME)
+    surfI = pygame.Surface((int(12*SFACTOR), int(28*SFACTOR)))
+    surfI.fill((255,255,255))
+    rectI = surfI.get_rect()
+    rectI.center = (int((WIDTH/2)+(-470*SFACTOR+(340*VOLUME*SFACTOR))),int((HEIGHT/2)+(-140*SFACTOR)))
+
+    surfL = pygame.Surface((int(382*SFACTOR), int(4*SFACTOR)))
+    surfL.fill((190,190,190))
+    rectL = surfL.get_rect()
+    rectL.center = (int((WIDTH/2)+(-300*SFACTOR)),int((HEIGHT/2)+(-140*SFACTOR)))
+
+    displaysurface.blit(surfL, rectL)
+    displaysurface.blit(surfI, rectI)
 
 def HelpDrawer():
     pass
@@ -534,15 +683,36 @@ def PriceChecker(ID):
         return False
 
 def Success():
-    #Play + sound
+    pygame.mixer.Sound.play(SuccessSound) 
     print("Action Success")
 
 def Fail():
-    #Play fail sound
+    pygame.mixer.Sound.play(FailSound) 
     print("Action Fail")
 
-def Settings():
-    print("Action Occured")
+def Click():
+    print("Click!")
+    pygame.mixer.Sound.play(ClickSound) 
+
+def PlanetMusic(State):
+    global MUSICPLAYING
+    if State == 2:
+        if MUSICPLAYING:
+            pass
+        else:
+            MUSICPLAYING = True
+            pygame.mixer.music.load("Resources/Sounds/" + TARGET.info[8] + "Music.wav")
+            pygame.mixer.music.play(-1)
+    elif State == 1 or State == 3:
+        MUSICPLAYING = False
+        pygame.mixer.music.fadeout(30)
+    elif State == 0:
+        if MUSICPLAYING:
+            pass
+        else:
+            MUSICPLAYING = True
+            pygame.mixer.music.load("Resources/Sounds/Space.mp3")
+            pygame.mixer.music.play(-1)
 
 #Object classes
 class MiniPlanet(pygame.sprite.Sprite):
@@ -656,6 +826,10 @@ class Descriptor(pygame.sprite.Sprite):
             self.surf.set_alpha(self.info[3])
             self.rect = self.surf.get_rect()
             self.rect.midright = (int(WIDTH), int(HEIGHT/2))
+    def IsGui(self):
+        return True
+    def Clicked(self):
+        pass
 
 class TextDrawer(pygame.sprite.Sprite):
     def __init__(self):
@@ -883,7 +1057,7 @@ class MinerSellButtons(pygame.sprite.Sprite):
                     MinerSurfS = pygame.transform.scale(MinerSurf, (int(32*SFACTOR),int(32*SFACTOR)))
                     MinerRectS = MinerSurfS.get_rect()
                     try:
-                        MinerRectS.center = (int((WIDTH/2)+(SFACTOR*((self.Randomizer[RandomID])+60))),int((HEIGHT/2)+(SFACTOR*((self.Randomizer[RandomID+1])+250))))
+                        MinerRectS.center = (int((WIDTH/2)+(SFACTOR*((self.Randomizer[RandomID])+60))),int((HEIGHT/2)+(SFACTOR*((self.Randomizer[RandomID+1])+280))))
                         displaysurface.blit(MinerSurfS, MinerRectS)
                         RandomID += 2
                     except:
@@ -1001,10 +1175,19 @@ market_render.add(RMBuyBt)
 market_render.add(IncrementBuyBt)
 market_render.add(DecrementBuyBt)
 
-#All settings Objects
+#All settings Objects  VolUpBt
 SettingsGUI = Settings()
+VolUpBt = ButtonObject(VolUpInf)
+VolDownBt = ButtonObject(VolDownInf)
+ResetBt = ButtonObject(ResetInf)
+CreditsBt = ButtonObject(CreditsInf)
+
 settings_render = pygame.sprite.Group()
 settings_render.add(SettingsGUI)
+settings_render.add(VolUpBt)
+settings_render.add(VolDownBt)
+settings_render.add(ResetBt)
+settings_render.add(CreditsBt)
 
 #All help Objects
 HelpGUI = Help()
@@ -1047,6 +1230,7 @@ RunothButtons = MinerSellButtons("R")
 #All Objects that can be clciked on
 #GUI OBJECTS MUST COME BEFORE NON GUI OBJECTS (Planets)
 ClickableEntities = pygame.sprite.Group()
+ClickableEntities.add(SunDescriptor)
 ClickableEntities.add(MarketButton)
 ClickableEntities.add(SettingsButton)
 ClickableEntities.add(HelpButton)
@@ -1069,8 +1253,8 @@ ClickableEntities.add(RLBtn)
 ClickableEntities.add(RMBtn)
 ClickableEntities.add(RHBtn)
 
-
 MineralDrawer = MineralDraw()
+
 #Main Game loop
 while True:
 
@@ -1154,6 +1338,7 @@ while True:
                             FOCUSACTIVE = False
                             EASE = 0
                             GAMESTATE = 3
+                            pygame.mixer.Sound.play(SwooshOut) 
                         #If clicked on another planet
                         else:
                             for entity in planet_list:
@@ -1161,7 +1346,8 @@ while True:
                             TARGET.FocusSet(True)
                             EASE = 0
                             FOCUSACTIVE = True
-                            GAMESTATE = 1                            
+                            GAMESTATE = 1
+                            pygame.mixer.Sound.play(SwooshIn)                            
                 #EmptySpace was clicked
                 else:
                     if FOCUSACTIVE and not WASGUI:
@@ -1170,6 +1356,8 @@ while True:
                         for entity in planet_list:
                             entity.FocusSet(False)
                         GAMESTATE = 3
+                        pygame.mixer.Sound.play(SwooshOut) 
+
 
 
             #Scroll whell actions
@@ -1249,8 +1437,11 @@ while True:
         WIDTH = displaysurface.get_width()
         HEIGHT = displaysurface.get_height()
 
+    #MusicSystem
+    PlanetMusic(GAMESTATE)
+
     #Uncomment for FPS counter
-    print(str(int(FramePerSec.get_fps())))
+    #print(str(int(FramePerSec.get_fps())))
 
     # MONEY = CLOCK*89
     # RAREMINERAL = int(23982893*math.sin(CLOCK/334))
